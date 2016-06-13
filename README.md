@@ -1,4 +1,4 @@
-# Kalamuna's fork of [Drupal VM](http://www.drupalvm.com/)
+# A fork of [Drupal VM](http://www.drupalvm.com/) with some pre-configured sites
 
 ## Usage
 
@@ -12,9 +12,9 @@
     ```
     vagrant plugin install vagrant-hostmanager
     ```
-1.  Clone this Kalamuna fork of Drupal VM anywhere on your computer. It will
-    automatically track the `kalamuna` branch, which represents the latest
-    Kalamuna-approved Drupal VM release with all our changes added in.
+1.  Clone this fork of Drupal VM anywhere on your computer. It will
+    automatically track the `forked` branch, which represents the latest
+    approved Drupal VM release with all our changes added in.
 
     ```
     git clone git@github.com:derekderaps/drupal-vm.git
