@@ -1,7 +1,7 @@
 ---
 # `vagrant_box` can also be set to geerlingguy/centos6, geerlingguy/centos7,
 # geerlingguy/ubuntu1404, geerlingguy/ubuntu1204, parallels/ubuntu-14.04, etc.
-vagrant_box: geerlingguy/ubuntu1604
+vagrant_box: geerlingguy/ubuntu1404
 vagrant_user: vagrant
 vagrant_synced_folder_default_type: nfs
 
@@ -23,7 +23,47 @@ vagrant_synced_folders:
   # The first synced folder will be used for the default Drupal installation, if
   # any of the build_* settings are 'true'. By default the folder is set to
   # the drupal-vm folder.
-  - local_path: .
+  - local_path: ~/Sites/dent
+    destination: /var/www/drupalvm
+    type: nfs
+    create: true
+
+  - local_path: ~/Sites/eecs
+    destination: /var/www/drupalvm
+    type: nfs
+    create: true
+
+  - local_path: ~/Sites/greenbiz
+    destination: /var/www/drupalvm
+    type: nfs
+    create: true
+
+  - local_path: ~/Sites/kalablog
+    destination: /var/www/drupalvm
+    type: nfs
+    create: true
+
+  - local_path: ~/Sites/kcom
+    destination: /var/www/drupalvm
+    type: nfs
+    create: true
+
+  - local_path: ~/Sites/stamp
+    destination: /var/www/drupalvm
+    type: nfs
+    create: true
+
+  - local_path: ~/Sites/trulymad
+    destination: /var/www/drupalvm
+    type: nfs
+    create: true
+
+  - local_path: ~/Sites/ucsfp
+    destination: /var/www/drupalvm
+    type: nfs
+    create: true
+
+  - local_path: ~/Sites/usfi
     destination: /var/www/drupalvm
     type: nfs
     create: true
@@ -33,7 +73,7 @@ vagrant_memory: 1024
 vagrant_cpus: 2
 
 # The web server software to use. Can be either 'apache' or 'nginx'.
-drupalvm_webserver: apache
+drupalvm_webserver: nginx
 
 # Set this to 'false' if you are using a different site deployment strategy and
 # would like to configure 'vagrant_synced_folders' and 'apache_vhosts' manually.
@@ -50,13 +90,13 @@ drupal_composer_dependencies:
 
 # Set this to 'true' and 'build_makefile', 'build_composer' to 'false' if you
 # are using Composer's create-project as a site deployment strategy.
-build_composer_project: true
+build_composer_project: false
 drupal_composer_project_package: "drupal-composer/drupal-project:8.x-dev"
 drupal_composer_project_options: "--prefer-dist --stability dev --no-interaction"
 
 # Set this to 'false' if you don't need to install drupal (using the drupal_*
 # settings below), but instead copy down a database (e.g. using drush sql-sync).
-install_site: true
+install_site: false
 
 # Settings for installing a Drupal site (if 'install_site:' is 'true').
 drupal_major_version: 8
@@ -130,24 +170,55 @@ apache_mods_enabled:
 # here. Set the 'is_php' property for document roots that contain PHP apps like
 # Drupal.
 nginx_hosts:
-  - server_name: "{{ drupal_domain }}"
-    root: "{{ drupal_core_path }}"
-    is_php: true
-
-  - server_name: "adminer.{{ vagrant_hostname }}"
+  - server_name: "adminer.dvm"
     root: "{{ adminer_install_dir }}"
     is_php: true
 
-  - server_name: "xhprof.{{ vagrant_hostname }}"
+  - server_name: "xhprof.dvm"
     root: "{{ php_xhprof_html_dir }}"
     is_php: true
 
-  - server_name: "pimpmylog.{{ vagrant_hostname }}"
+  - server_name: "pimpmylog.dvm"
     root: "{{ pimpmylog_install_dir }}"
     is_php: true
 
-  - server_name: "{{ vagrant_ip }} dashboard.{{ vagrant_hostname }}"
+  - server_name: "{{ vagrant_ip }} dashboard.dvm"
     root: "{{ dashboard_install_dir }}"
+
+  - server_name: "dent.dvm"
+    root: "/var/www/dent"
+    is_php: true
+
+  - server_name: "eecs.dvm"
+    root: "/var/www/eecs"
+    is_php: true
+
+  - server_name: "greenbiz.dvm"
+    root: "/var/www/greenbiz"
+    is_php: true
+
+  - server_name: "kalablog.dvm"
+    root: "/var/www/kalablog"
+    is_php: true
+
+  - server_name: "kcom.dvm"
+    root: "/var/www/kcom"
+
+  - server_name: "stamp.dvm"
+    root: "/var/www/stamp"
+    is_php: true
+
+  - server_name: "trulymad.dvm"
+    root: "/var/www/trulymad"
+    is_php: true
+
+  - server_name: "ucsfp.dvm"
+    root: "/var/www/ucsfp/docroot"
+    is_php: true
+
+  - server_name: "usfi.dvm"
+    root: "/var/www/usfi"
+    is_php: true
 
 nginx_remove_default_vhost: true
 nginx_ppa_use: true
@@ -155,7 +226,35 @@ nginx_ppa_use: true
 # MySQL Databases and users. If 'install_site' is 'true', first database will
 # be used for the site.
 mysql_databases:
-  - name: "{{ drupal_mysql_database }}"
+  - name: "dent_drupalvm"
+    encoding: utf8
+    collation: utf8_general_ci
+
+  - name: "eecs_drupalvm"
+    encoding: utf8
+    collation: utf8_general_ci
+
+  - name: "greenbiz_drupalvm"
+    encoding: utf8
+    collation: utf8_general_ci
+
+  - name: "kalablog_drupalvm"
+    encoding: utf8
+    collation: utf8_general_ci
+
+  - name: "stamp_drupalvm"
+    encoding: utf8
+    collation: utf8_general_ci
+
+  - name: "trulymad_drupalvm"
+    encoding: utf8
+    collation: utf8_general_ci
+
+  - name: "ucsfp_drupalvm"
+    encoding: utf8
+    collation: utf8_general_ci
+
+  - name: "usfi_drupalvm"
     encoding: utf8
     collation: utf8_general_ci
 
@@ -174,15 +273,15 @@ installed_extras:
   - mailhog
   # - memcached
   # - newrelic
-  # - nodejs
+  - nodejs
   - pimpmylog
-  # - redis
-  # - ruby
+  - redis
+  - ruby
   # - selenium
-  # - solr
+  - solr
   - varnish
-  # - xdebug
-  # - xhprof
+  - xdebug
+  - xhprof
 
 # Add any extra apt or yum packages you would like installed.
 extra_packages:
@@ -220,8 +319,8 @@ firewall_log_dropped_packets: false
 
 # PHP Configuration. Currently-supported versions: 5.6, 7.0.
 # To use 5.6, see: http://docs.drupalvm.com/en/latest/other/php-56/
-php_version: "7.0"
-php_memory_limit: "192M"
+php_version: "5.6"
+php_memory_limit: "384M"
 php_display_errors: "On"
 php_display_startup_errors: "On"
 php_realpath_cache_size: "1024K"
@@ -230,6 +329,37 @@ php_opcache_enabled_in_ini: true
 php_opcache_memory_consumption: "192"
 php_opcache_max_accelerated_files: 4096
 php_max_input_vars: "4000"
+
+# Added to support PHP 5.6.
+# @see http://docs.drupalvm.com/en/latest/other/php-56/
+php_packages:
+  - php5
+  - php5-apcu
+  - php5-mcrypt
+  - php5-cli
+  - php5-common
+  - php5-curl
+  - php5-dev
+  - php5-fpm
+  - php5-gd
+  - php5-sqlite
+  - php-pear
+  - libpcre3-dev
+php_conf_paths:
+  - /etc/php5/fpm
+  - /etc/php5/apache2
+  - /etc/php5/cli
+php_extension_conf_paths:
+  - /etc/php5/fpm/conf.d
+  - /etc/php5/apache2/conf.d
+  - /etc/php5/cli/conf.d
+php_fpm_daemon: php5-fpm
+php_fpm_conf_path: "/etc/php5/fpm"
+php_fpm_pool_conf_path: "/etc/php5/fpm/pool.d/www.conf"
+php_mysql_package: php5-mysql
+php_redis_package: php5-redis
+xhprof_download_url: https://github.com/phacility/xhprof/archive/master.tar.gz
+xhprof_download_folder_name: xhprof-master
 
 # Drupal VM defaults to using PHP-FPM with either Apache or Nginx. If you wish
 # to instead use Apache + mod_php with an Ubuntu base box, make sure you add
@@ -270,7 +400,7 @@ pimpmylog_grant_all_privs: true
 # XDebug configuration. XDebug is disabled by default for better performance.
 php_xdebug_default_enable: 0
 php_xdebug_coverage_enable: 0
-php_xdebug_cli_enable: 1
+php_xdebug_cli_enable: 0
 php_xdebug_remote_enable: 1
 php_xdebug_remote_connect_back: 1
 # Use PHPSTORM for PHPStorm, sublime.xdebug for Sublime Text.
