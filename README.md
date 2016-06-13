@@ -1,3 +1,115 @@
+# Kalamuna's fork of [Drupal VM](http://www.drupalvm.com/)
+
+## Usage
+
+### First-run
+
+1.  If you haven't already, download and install [Vagrant](https://www.vagrantup.com/).
+1.  Install the [Vagrant Host
+    Manager](https://github.com/devopsgroup-io/vagrant-hostmanager) to
+    automatically keep your `/etc/hosts` file up-to-date.
+
+    ```
+    vagrant plugin install vagrant-hostmanager
+    ```
+1.  Clone this Kalamuna fork of Drupal VM anywhere on your computer. It will
+    automatically track the `kalamuna` branch, which represents the latest
+    Kalamuna-approved Drupal VM release with all our changes added in.
+
+    ```
+    git clone git@github.com:derekderaps/drupal-vm.git
+    ```
+1.  From the command line, `cd` into the `drupal-vm` repo directory you just
+    cloned.
+
+    ```
+    cd drupal-vm
+    ```
+1.  Create a `config.yml` file and adjust your VM's memory allocation to ¼ your
+    system total and ½ your virtual CPUs. Virtual CPUs are typically double the
+    number of physical cores (on OS X, use `sysctl -n hw.ncpu` to find out).
+
+    ```
+    ---
+    vagrant_memory: 4096
+    vagrant_cpus: 4
+    ```
+1.  Run `vagrant up` and wait for it to finish, usually 15-30 minutes from the
+    Ubuntu base box download step.
+1.  Visit http://dashboard.dvm to see all the sites, drush aliases, and tools
+    available to you.
+
+### Site setup
+
+If you see a database connection error when trying to visit your site, it probably means that `settings.php` has not yet been set up for Drupal VM. For a long-term solution, submit an issue or PR to your project repo to have the Drupal VM connection info added to `sites/default/settings.php`. But to get going immediately, follow these steps:
+
+1.  Edit your global `.gitignore` file (probably `~/.gitignore`) and add a line for,
+
+    ```
+    sites/*.dvm
+    ```
+1.  Create a `<site>.dvm` sites directory.
+1.  Add these lines to `settings.php` (update the database name):
+
+    ```
+    <?php
+    include DRUPAL_ROOT . '/sites/default/settings.php';
+    $databases['default']['default'] = array(
+      'driver' => 'mysql',
+      'database' => '<site>_drupalvm',
+      'username' => 'drupal',
+      'password' => 'drupal',
+      'host' => 'localhost',
+      'prefix' => '',
+    );
+    ```
+
+Once `settings.php` is configured for the site, you can import a database dump
+to it. Thanks to Drupal VM, [Adminer](https://www.adminer.org/) is installed at
+http://adminer.dvm. Log in with user `root` and password `root`. Or use `drush`
+to import a dump:
+
+```
+drush @drupalvm.<site>.dvm sqlc < /path/to/dump.sql
+```
+
+That's it, folks! Follow the links on http://dashboard.dvm to visit each of your sites.
+
+### Adding new sites
+
+When we add new sites or make other changes to the VM configuration, you
+typically don't need to `vagrant destroy` it and start over; a simple
+re-provisioning should do fine (and is much quicker):
+
+`vagrant reload --provision`
+
+If you want more sites added to this config, submit an issue or PR to this
+repo.  It typically requires adding entries to these three YAML arrays in
+`default.config.yml`:
+
+1.  `vagrant_synced_folders`
+1.  `nginx_hosts`
+1.  `mysql_databases`
+
+## FAQ
+
+1.  Why append `_drupalvm` to database names?
+
+    _As a flag to provide peace-of-mind that "Yes, this is my local" when running `sql-drop` and other scary operations. E.g.,_
+
+    > _Are you sure you want to drop database `mysite_drupalvm`?_
+
+1.  Can I add some local sites without committing them to this repo?
+
+    _Yes, but I'm not satisifed with the solution. You have to copy
+    `default.config.yml` to `config.yml` and update the configuration specified
+    above in "Adding new sites." However, by doing so you lose some changes
+    (like new sites) that get made to `default.config.yml`. I'm working on
+    this. It probably just needs the call to `merge()` in `Vagrantfile`
+    replaced with a recursive implementation._
+
+## Upstream Drupal VM README continues below
+
 ![Drupal VM Logo](https://raw.githubusercontent.com/geerlingguy/drupal-vm/master/docs/images/drupal-vm-logo.png)
 
 [![Build Status](https://travis-ci.org/geerlingguy/drupal-vm.svg?branch=master)](https://travis-ci.org/geerlingguy/drupal-vm) [![Documentation Status](https://readthedocs.org/projects/drupal-vm/badge/?version=latest)](http://docs.drupalvm.com) [![Packagist](https://img.shields.io/packagist/v/geerlingguy/drupal-vm.svg)](https://packagist.org/packages/geerlingguy/drupal-vm)
