@@ -4,7 +4,7 @@
 
 ### First-run
 
-1.  If you haven't already, download and install [Vagrant](https://www.vagrantup.com/).
+1.  If you haven't already, download and install [Vagrant](https://www.vagrantup.com/) and [VirtualBox](https://www.virtualbox.org/wiki/Downloads)
 1.  Install [Vagrant Host
     Manager](https://github.com/devopsgroup-io/vagrant-hostmanager) to
     automatically keep your `/etc/hosts` file up-to-date. Note that this step
