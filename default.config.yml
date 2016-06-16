@@ -24,47 +24,47 @@ vagrant_synced_folders:
   # any of the build_* settings are 'true'. By default the folder is set to
   # the drupal-vm folder.
   - local_path: ~/Sites/dent
-    destination: /var/www/drupalvm
+    destination: /var/www/dent
     type: nfs
     create: true
 
   - local_path: ~/Sites/eecs
-    destination: /var/www/drupalvm
+    destination: /var/www/eecs
     type: nfs
     create: true
 
   - local_path: ~/Sites/greenbiz
-    destination: /var/www/drupalvm
+    destination: /var/www/greenbiz
     type: nfs
     create: true
 
   - local_path: ~/Sites/kalablog
-    destination: /var/www/drupalvm
+    destination: /var/www/kalablog
     type: nfs
     create: true
 
   - local_path: ~/Sites/kcom
-    destination: /var/www/drupalvm
+    destination: /var/www/kcom
     type: nfs
     create: true
 
   - local_path: ~/Sites/stamp
-    destination: /var/www/drupalvm
+    destination: /var/www/stamp
     type: nfs
     create: true
 
   - local_path: ~/Sites/trulymad
-    destination: /var/www/drupalvm
+    destination: /var/www/trulymad
     type: nfs
     create: true
 
   - local_path: ~/Sites/ucsfp
-    destination: /var/www/drupalvm
+    destination: /var/www/ucsfp
     type: nfs
     create: true
 
   - local_path: ~/Sites/usfi
-    destination: /var/www/drupalvm
+    destination: /var/www/usfi
     type: nfs
     create: true
 
@@ -262,7 +262,7 @@ mysql_users:
   - name: "{{ drupal_mysql_user }}"
     host: "%"
     password: "{{ drupal_mysql_password }}"
-    priv: "{{ drupal_mysql_database }}.*:ALL"
+    priv: "*.*:ALL"
 
 # Comment out any extra utilities you don't want to install. If you don't want
 # to install *any* extras, make set this value to an empty set, e.g. `[]`.
