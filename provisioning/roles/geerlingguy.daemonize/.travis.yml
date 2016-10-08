@@ -1,0 +1,60 @@
+---
+sudo: required
+
+env:
+  - repository: geerlingguy/docker-centos7-ansible
+    version: latest
+    init: /usr/lib/systemd/systemd
+    run_opts: "--privileged --volume=/sys/fs/cgroup:/sys/fs/cgroup:ro"
+  - repository: geerlingguy/docker-centos6-ansible
+    version: latest
+    init: /sbin/init
+    run_opts: ""
+  - repository: geerlingguy/docker-ubuntu1604-ansible
+    version: latest
+    init: /lib/systemd/systemd
+    run_opts: "--privileged --volume=/sys/fs/cgroup:/sys/fs/cgroup:ro"
+  - repository: geerlingguy/docker-ubuntu1404-ansible
+    version: latest
+    init: /sbin/init
+    run_opts: ""
+  - repository: geerlingguy/docker-ubuntu1204-ansible
+    version: latest
+    init: /sbin/init
+    run_opts: ""
+
+services:
+  - docker
+
+before_install:
+  # Pull container.
+  - 'sudo docker pull ${repository}:${version}'
+
+script:
+  - container_id=$(mktemp)
+  # Run container in detached state.
+  - 'sudo docker run --detach --volume="${PWD}":/etc/ansible/roles/role_under_test:ro ${run_opts} ${repository}:${version} "${init}" > "${container_id}"'
+
+  # Ansible syntax check.
+  - 'sudo docker exec --tty "$(cat ${container_id})" env TERM=xterm ansible-playbook /etc/ansible/roles/role_under_test/tests/test.yml --syntax-check'
+
+  # Test role.
+  - 'sudo docker exec --tty "$(cat ${container_id})" env TERM=xterm ansible-playbook /etc/ansible/roles/role_under_test/tests/test.yml'
+
+  # Test role idempotence.
+  - idempotence=$(mktemp)
+  - sudo docker exec "$(cat ${container_id})" ansible-playbook /etc/ansible/roles/role_under_test/tests/test.yml | tee -a ${idempotence}
+  - >
+    tail ${idempotence}
+    | grep -q 'changed=0.*failed=0'
+    && (echo 'Idempotence test: pass' && exit 0)
+    || (echo 'Idempotence test: fail' && exit 1)
+
+  # Ensure daemonize is available.
+  - 'sudo docker exec --tty "$(cat ${container_id})" env TERM=xterm which daemonize'
+
+  # Clean up.
+  - 'sudo docker stop "$(cat ${container_id})"'
+
+notifications:
+  webhooks: https://galaxy.ansible.com/api/v1/notifications/

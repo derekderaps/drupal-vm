@@ -18,8 +18,8 @@
     "require": {
         "composer/installers": "^1.0.20",
         "drupal-composer/drupal-scaffold": "^2.0.1",
-        "drupal/core": "~8.0",
-        "drupal/devel": "8.*"
+        "drupal/core": "~8.1",
+        "drupal/devel": "1.x-dev"
     },
     "replace": {
         "drupal/drupal": "*"
@@ -34,5 +34,8 @@
             "docroot/themes/contrib/{$name}": ["type:drupal-theme"],
             "drush/contrib/{$name}": ["type:drupal-drush"]
         }
+    },
+    "config": {
+        "process-timeout": 1200
     }
 }
