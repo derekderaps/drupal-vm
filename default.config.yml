@@ -367,6 +367,7 @@ php_opcache_enabled_in_ini: true
 php_opcache_memory_consumption: "192"
 php_opcache_max_accelerated_files: 4096
 php_max_input_vars: "4000"
+php_max_execution_time: "900"
 
 # Added to support PHP 5.6.
 # @see http://docs.drupalvm.com/en/latest/other/php-56/
