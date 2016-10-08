@@ -121,21 +121,22 @@ repo.  It typically requires adding entries to these three YAML arrays in
 
 [![Build Status](https://travis-ci.org/geerlingguy/drupal-vm.svg?branch=master)](https://travis-ci.org/geerlingguy/drupal-vm) [![Documentation Status](https://readthedocs.org/projects/drupal-vm/badge/?version=latest)](http://docs.drupalvm.com) [![Packagist](https://img.shields.io/packagist/v/geerlingguy/drupal-vm.svg)](https://packagist.org/packages/geerlingguy/drupal-vm)
 
-[Drupal VM](http://www.drupalvm.com/) is A VM for local Drupal development, built with Vagrant + Ansible.
+[Drupal VM](https://www.drupalvm.com/) is A VM for local Drupal development, built with Vagrant + Ansible.
 
 This project aims to make spinning up a simple local Drupal test/development environment incredibly quick and easy, and to introduce new developers to the wonderful world of Drupal development on local virtual machines (instead of crufty old MAMP/WAMP-based development).
 
 It will install the following on an Ubuntu 16.04 (by default) linux VM:
 
-  - Apache 2.4.x (or Nginx 1.x)
+  - Apache 2.4.x (or Nginx)
   - PHP 7.0.x (configurable)
-  - MySQL 5.7.x
+  - MySQL 5.7.x (or MariaDB, or PostgreSQL)
   - Drush (configurable)
   - Drupal 7.x, or 8.x.x (configurable)
   - Optional:
     - Drupal Console
     - Varnish 4.x (configurable)
     - Apache Solr 4.10.x (configurable)
+    - Elasticsearch
     - Node.js 0.12 (configurable)
     - Selenium, for testing your sites via Behat
     - Ruby
@@ -167,8 +168,8 @@ There are a couple places where you can customize the VM for your needs:
 If you want to switch from Drupal 8 (default) to Drupal 7 on the initial install, do the following:
 
   1. Switch to using a [Drush Make file](http://docs.drupalvm.com/en/latest/deployment/drush-make/).
-  1. Update the Drupal `version` and `core` inside the `drupal.make.yml` file.
-  2. Update `drupal_major_version` inside `config.yml`.
+  1. Update the Drupal `version` and `core` inside your `drupal.make.yml` file.
+  2. Set `drupal_major_version: 7` inside `config.yml`.
 
 ## Quick Start Guide
 
@@ -176,23 +177,23 @@ This Quick Start Guide will help you quickly build a Drupal 8 site on the Drupal
 
 If you want to install a Drupal 8 site locally with minimal fuss, just:
 
-  1. Install Vagrant.
+  1. Install [Vagrant](https://www.vagrantup.com/downloads.html) and [VirtualBox](https://www.virtualbox.org/wiki/Downloads).
   2. Download or clone this project to your workstation.
   3. `cd` into this project directory and run `vagrant up`.
 
 But Drupal VM allows you to build your site exactly how you like, using whatever tools you need, with almost infinite flexibility and customization!
 
-### 1 - Install Vagrant
+### 1 - Install Vagrant and VirtualBox
 
-Download and install [Vagrant](https://www.vagrantup.com/downloads.html).
+Download and install [Vagrant](https://www.vagrantup.com/downloads.html) and [VirtualBox](https://www.virtualbox.org/wiki/Downloads).
 
-Vagrant will automatically install [VirtualBox](https://www.virtualbox.org/wiki/Downloads) if no providers are available (Drupal VM also works with Parallels or VMware, if you have the [Vagrant VMware integration plugin](http://www.vagrantup.com/vmware)).
+You can also use an alternative provider like Parallels or VMware. (Parallels Desktop 11+ requires the "Pro" or "Business" edition and the [Parallels Provider](http://parallels.github.io/vagrant-parallels/), and VMware requires the paid [Vagrant VMware integration plugin](http://www.vagrantup.com/vmware)).
 
 Notes:
 
-  - **For faster provisioning** (Mac/Linux only): *[Install Ansible](http://docs.ansible.com/intro_installation.html) on your host machine, so Drupal VM can run the provisioning steps locally instead of inside the VM.*
+  - **For faster provisioning** (macOS/Linux only): *[Install Ansible](http://docs.ansible.com/intro_installation.html) on your host machine, so Drupal VM can run the provisioning steps locally instead of inside the VM.*
   - **NFS on Linux**: *If NFS is not already installed on your host, you will need to install it to use the default NFS synced folder configuration. See guides for [Debian/Ubuntu](https://www.digitalocean.com/community/tutorials/how-to-set-up-an-nfs-mount-on-ubuntu-14-04), [Arch](https://wiki.archlinux.org/index.php/NFS#Installation), and [RHEL/CentOS](https://www.digitalocean.com/community/tutorials/how-to-set-up-an-nfs-mount-on-centos-6).*
-  - **Versions**: *Make sure you're running the latest releases of Vagrant, VirtualBox, and Ansible—as of February 2016, Drupal VM recommends: Vagrant 1.8.1, VirtualBox 5.0.20, and Ansible 2.1.0.*
+  - **Versions**: *Make sure you're running the latest releases of Vagrant, VirtualBox, and Ansible—as of February 2016, Drupal VM recommends: Vagrant 1.8.5, VirtualBox 5.1.x, and Ansible 2.1.x.*
 
 ### 2 - Build the Virtual Machine
 

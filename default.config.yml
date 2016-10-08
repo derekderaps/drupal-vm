@@ -7,7 +7,7 @@ vagrant_synced_folder_default_type: nfs
 
 # If you need to run multiple instances of Drupal VM, set a unique hostname,
 # machine name, and IP address for each instance.
-vagrant_hostname: drupalvm.dev
+vagrant_hostname: dvm
 vagrant_machine_name: drupalvm
 vagrant_ip: 192.168.88.88
 
@@ -80,15 +80,26 @@ vagrant_synced_folders:
 
 # Memory and CPU to use for this VM.
 vagrant_memory: 1024
-vagrant_cpus: 2
+vagrant_cpus: 1
+
+# Minimum required versions.
+drupalvm_vagrant_version_min: '1.8.5'
+drupalvm_ansible_version_min: '2.1'
+
+# Force use of ansible_local provisioner, even if Ansible is installed on host.
+force_ansible_local: false
 
 # The web server software to use. Can be either 'apache' or 'nginx'.
 drupalvm_webserver: nginx
+
+# The database system to use. Can be either 'mysql' or 'pgsql'.
+drupalvm_database: mysql
 
 # Set this to 'false' if you are using a different site deployment strategy and
 # would like to configure 'vagrant_synced_folders' and 'apache_vhosts' manually.
 build_makefile: false
 drush_makefile_path: "{{ config_dir }}/drupal.make.yml"
+drush_make_options: "--no-gitinfofile"
 
 # Set 'build_makefile' to 'false' and this to 'true' if you are using a
 # composer based site deployment strategy.
@@ -96,7 +107,7 @@ build_composer: false
 drupal_composer_path: "{{ config_dir }}/drupal.composer.json"
 drupal_composer_install_dir: "/var/www/drupalvm/drupal"
 drupal_composer_dependencies:
-  - "drupal/devel:8.*"
+  - "drupal/devel:1.x-dev"
 
 # Set this to 'true' and 'build_makefile', 'build_composer' to 'false' if you
 # are using Composer's create-project as a site deployment strategy.
@@ -108,18 +119,20 @@ drupal_composer_project_options: "--prefer-dist --stability dev --no-interaction
 # settings below), but instead copy down a database (e.g. using drush sql-sync).
 install_site: false
 
-# Settings for installing a Drupal site (if 'install_site:' is 'true').
-drupal_major_version: 8
+# Required Drupal settings.
 drupal_core_path: "{{ drupal_composer_install_dir }}/web"
+drupal_db_user: drupal
+drupal_db_password: drupal
+drupal_db_name: drupal
+
+# Settings for installing a Drupal site if 'install_site:' is 'true'.
+drupal_major_version: 8
 drupal_domain: "{{ vagrant_hostname }}"
 drupal_site_name: "Drupal"
 drupal_install_profile: standard
 drupal_enable_modules: [ 'devel' ]
 drupal_account_name: admin
 drupal_account_pass: admin
-drupal_mysql_user: drupal
-drupal_mysql_password: drupal
-drupal_mysql_database: drupal
 
 # Additional arguments or options to pass to `drush site-install`.
 drupal_site_install_extra_args: []
@@ -127,11 +140,9 @@ drupal_site_install_extra_args: []
 # Cron jobs are added to the vagrant user's crontab. Keys include name
 # (required), minute, hour, day, weekday, month, job (required), and state.
 drupalvm_cron_jobs: []
-  # - {
-  #   name: "Drupal Cron",
+  # - name: "Drupal Cron",
   #   minute: "*/30",
   #   job: "drush -r {{ drupal_core_path }} core-cron"
-  # }
 
 # Drupal VM automatically creates a drush alias file in your ~/.drush folder if
 # this variable is 'true'.
@@ -142,6 +153,7 @@ configure_drush_aliases: true
 # View the geerlingguy.apache Ansible Role README for more options.
 apache_vhosts:
   - servername: "{{ drupal_domain }}"
+    serveralias: "www.{{ drupal_domain }}"
     documentroot: "{{ drupal_core_path }}"
     extra_parameters: |
           ProxyPassMatch ^/(.*\.php(/.*)?)$ "fcgi://127.0.0.1:9000{{ drupal_core_path }}"
@@ -180,134 +192,146 @@ apache_mods_enabled:
 # here. Set the 'is_php' property for document roots that contain PHP apps like
 # Drupal.
 nginx_hosts:
-  - server_name: "adminer.dvm"
+
+  - server_name: "adminer.{{ vagrant_hostname }}"
     root: "{{ adminer_install_dir }}"
     is_php: true
 
-  - server_name: "xhprof.dvm"
+  - server_name: "xhprof.{{ vagrant_hostname }}"
     root: "{{ php_xhprof_html_dir }}"
     is_php: true
 
-  - server_name: "pimpmylog.dvm"
+  - server_name: "pimpmylog.{{ vagrant_hostname }}"
     root: "{{ pimpmylog_install_dir }}"
     is_php: true
 
-  - server_name: "{{ vagrant_ip }} dashboard.dvm"
+  - server_name: "{{ vagrant_ip }} dashboard.{{ vagrant_hostname }}"
     root: "{{ dashboard_install_dir }}"
 
-  - server_name: "dent.dvm"
+  - server_name: "dent.{{ vagrant_hostname }}"
     root: "/var/www/dent"
     is_php: true
 
-  - server_name: "eecs.dvm"
+  - server_name: "eecs.{{ vagrant_hostname }}"
     root: "/var/www/eecs"
     is_php: true
 
-  - server_name: "ee.eecs.dvm"
+  - server_name: "ee.eecs.{{ vagrant_hostname }}"
     root: "/var/www/eecs"
     is_php: true
 
-  - server_name: "cs.eecs.dvm"
+  - server_name: "cs.eecs.{{ vagrant_hostname }}"
     root: "/var/www/eecs"
     is_php: true
 
-  - server_name: "eight.dvm"
+  - server_name: "eight.{{ vagrant_hostname }}"
     root: "/var/www/eight"
     is_php: true
 
-  - server_name: "greenbiz.dvm"
+  - server_name: "greenbiz.{{ vagrant_hostname }}"
     root: "/var/www/greenbiz"
     is_php: true
 
-  - server_name: "gbz.dvm"
+  - server_name: "gbz.{{ vagrant_hostname }}"
     root: "/var/www/greenbiz"
     is_php: true
 
-  - server_name: "kalablog.dvm"
+  - server_name: "kalablog.{{ vagrant_hostname }}"
     root: "/var/www/kalablog"
     is_php: true
 
-  - server_name: "kcom.dvm"
+  - server_name: "kcom.{{ vagrant_hostname }}"
     root: "/var/www/kcom"
 
-  - server_name: "seven.dvm"
+  - server_name: "seven.{{ vagrant_hostname }}"
     root: "/var/www/seven"
     is_php: true
 
-  - server_name: "stamp.dvm"
+  - server_name: "stamp.{{ vagrant_hostname }}"
     root: "/var/www/stamp"
     is_php: true
 
-  - server_name: "trulymad.dvm"
+  - server_name: "trulymad.{{ vagrant_hostname }}"
     root: "/var/www/trulymad"
     is_php: true
 
-  - server_name: "ucsfp.dvm"
+  - server_name: "ucsfp.{{ vagrant_hostname }}"
     root: "/var/www/ucsfp/docroot"
     is_php: true
 
-  - server_name: "usfi.dvm"
+  - server_name: "usfi.{{ vagrant_hostname }}"
     root: "/var/www/usfi"
     is_php: true
 
 nginx_remove_default_vhost: true
 nginx_ppa_use: true
 
-# MySQL Databases and users. If 'install_site' is 'true', first database will
-# be used for the site.
+# MySQL databases and users.
 mysql_databases:
-  - name: "dent_drupalvm"
-    encoding: utf8
-    collation: utf8_general_ci
+  - name: "dent_{{ drupal_db_name }}"
+    encoding: utf8mb4
+    collation: utf8mb4_general_ci
 
-  - name: "eecs_drupalvm"
-    encoding: utf8
-    collation: utf8_general_ci
+  - name: "eecs_{{ drupal_db_name }}"
+    encoding: utf8mb4
+    collation: utf8mb4_general_ci
 
-  - name: "eight_drupalvm"
-    encoding: utf8
-    collation: utf8_general_ci
+  - name: "eight_{{ drupal_db_name }}"
+    encoding: utf8mb4
+    collation: utf8mb4_general_ci
 
-  - name: "greenbiz_drupalvm"
-    encoding: utf8
-    collation: utf8_general_ci
+  - name: "greenbiz_{{ drupal_db_name }}"
+    encoding: utf8mb4
+    collation: utf8mb4_general_ci
 
-  - name: "kalablog_drupalvm"
-    encoding: utf8
-    collation: utf8_general_ci
+  - name: "kalablog_{{ drupal_db_name }}"
+    encoding: utf8mb4
+    collation: utf8mb4_general_ci
 
-  - name: "seven_drupalvm"
-    encoding: utf8
-    collation: utf8_general_ci
+  - name: "seven_{{ drupal_db_name }}"
+    encoding: utf8mb4
+    collation: utf8mb4_general_ci
 
-  - name: "stamp_drupalvm"
-    encoding: utf8
-    collation: utf8_general_ci
+  - name: "stamp_{{ drupal_db_name }}"
+    encoding: utf8mb4
+    collation: utf8mb4_general_ci
 
-  - name: "trulymad_drupalvm"
-    encoding: utf8
-    collation: utf8_general_ci
+  - name: "trulymad_{{ drupal_db_name }}"
+    encoding: utf8mb4
+    collation: utf8mb4_general_ci
 
-  - name: "ucsfp_drupalvm"
-    encoding: utf8
-    collation: utf8_general_ci
+  - name: "ucsfp_{{ drupal_db_name }}"
+    encoding: utf8mb4
+    collation: utf8mb4_general_ci
 
-  - name: "usfi_drupalvm"
-    encoding: utf8
-    collation: utf8_general_ci
+  - name: "usfi_{{ drupal_db_name }}"
+    encoding: utf8mb4
+    collation: utf8mb4_general_ci
 
 mysql_users:
-  - name: "{{ drupal_mysql_user }}"
+  - name: "{{ drupal_db_user }}"
     host: "%"
-    password: "{{ drupal_mysql_password }}"
+    password: "{{ drupal_db_password }}"
     priv: "*.*:ALL"
 
+# PostgreSQL databases and users.
+postgresql_databases:
+  - name: "{{ drupal_db_name }}"
+
+postgresql_users:
+  - name: "{{ drupal_db_user }}"
+    password: "{{ drupal_db_password }}"
+    db: "{{ drupal_db_name }}"
+    priv: "ALL"
+
 # Comment out any extra utilities you don't want to install. If you don't want
-# to install *any* extras, make set this value to an empty set, e.g. `[]`.
+# to install *any* extras, set this value to an empty set, e.g. `[]`.
 installed_extras:
   - adminer
   # - blackfire
   - drupalconsole
+  # - elasticsearch
+  # - java
   - mailhog
   # - memcached
   # - newrelic
@@ -324,16 +348,6 @@ installed_extras:
 # Add any extra apt or yum packages you would like installed.
 extra_packages:
   - sqlite
-
-# `nodejs` must be in installed_extras for this to work. Valid examples: "0.10",
-# "0.12", "4.x", "5.x".
-nodejs_version: "0.12"
-nodejs_npm_global_packages: []
-nodejs_install_npm_user: "{{ drupalvm_user }}"
-
-# `ruby` must be in installed_extras for this to work.
-ruby_install_gems_user: "{{ drupalvm_user }}"
-ruby_install_gems: []
 
 # You can configure almost anything else on the server in the rest of this file.
 extra_security_enabled: false
@@ -353,6 +367,7 @@ firewall_allowed_tcp_ports:
   - "8080"
   - "8443"
   - "8983"
+  - "9200"
 firewall_log_dropped_packets: false
 
 # PHP Configuration. Currently-supported versions: 5.6, 7.0.
@@ -362,7 +377,7 @@ php_memory_limit: "512M"
 php_display_errors: "On"
 php_display_startup_errors: "On"
 php_realpath_cache_size: "1024K"
-php_sendmail_path: "/usr/sbin/ssmtp -t"
+php_sendmail_path: "/opt/mailhog/mhsendmail"
 php_opcache_enabled_in_ini: true
 php_opcache_memory_consumption: "192"
 php_opcache_max_accelerated_files: 4096
@@ -426,7 +441,18 @@ mysql_slow_query_time: 2
 mysql_wait_timeout: 300
 adminer_install_filename: index.php
 
-# Varnish Configuration.
+# Node.js configuration (if enabled above).
+# Valid examples: "0.10", "0.12", "4.x", "5.x".
+nodejs_version: "0.12"
+nodejs_npm_global_packages: []
+nodejs_install_npm_user: "{{ drupalvm_user }}"
+npm_config_prefix: "/home/{{ drupalvm_user }}/.npm-global"
+
+# Ruby Configuration (if enabled above).
+ruby_install_gems_user: "{{ drupalvm_user }}"
+ruby_install_gems: []
+
+# Varnish Configuration (if enabled above).
 varnish_listen_port: "81"
 varnish_default_vcl_template_path: templates/drupalvm.vcl.j2
 varnish_default_backend_host: "127.0.0.1"
@@ -447,13 +473,14 @@ php_xdebug_idekey: PHPSTORM
 php_xdebug_max_nesting_level: 256
 
 # Solr Configuration (if enabled above).
-solr_version: "5.5.1"
+solr_version: "5.5.2"
 solr_xms: "64M"
 solr_xmx: "128M"
 
 # Selenium configuration.
-selenium_version: 2.46.0
+selenium_version: 2.53.0
 
 # Other configuration.
 dashboard_install_dir: /var/www/dashboard
 known_hosts_path: ~/.ssh/known_hosts
+#ssh_home: "{{ drupal_core_path }}"
