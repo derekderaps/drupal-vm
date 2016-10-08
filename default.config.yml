@@ -33,6 +33,11 @@ vagrant_synced_folders:
     type: nfs
     create: true
 
+  - local_path: ~/Sites/eight
+    destination: /var/www/eight
+    type: nfs
+    create: true
+
   - local_path: ~/Sites/greenbiz
     destination: /var/www/greenbiz
     type: nfs
@@ -45,6 +50,11 @@ vagrant_synced_folders:
 
   - local_path: ~/Sites/kcom
     destination: /var/www/kcom
+    type: nfs
+    create: true
+
+  - local_path: ~/Sites/seven
+    destination: /var/www/seven
     type: nfs
     create: true
 
@@ -193,7 +203,23 @@ nginx_hosts:
     root: "/var/www/eecs"
     is_php: true
 
+  - server_name: "ee.eecs.dvm"
+    root: "/var/www/eecs"
+    is_php: true
+
+  - server_name: "cs.eecs.dvm"
+    root: "/var/www/eecs"
+    is_php: true
+
+  - server_name: "eight.dvm"
+    root: "/var/www/eight"
+    is_php: true
+
   - server_name: "greenbiz.dvm"
+    root: "/var/www/greenbiz"
+    is_php: true
+
+  - server_name: "gbz.dvm"
     root: "/var/www/greenbiz"
     is_php: true
 
@@ -203,6 +229,10 @@ nginx_hosts:
 
   - server_name: "kcom.dvm"
     root: "/var/www/kcom"
+
+  - server_name: "seven.dvm"
+    root: "/var/www/seven"
+    is_php: true
 
   - server_name: "stamp.dvm"
     root: "/var/www/stamp"
@@ -234,11 +264,19 @@ mysql_databases:
     encoding: utf8
     collation: utf8_general_ci
 
+  - name: "eight_drupalvm"
+    encoding: utf8
+    collation: utf8_general_ci
+
   - name: "greenbiz_drupalvm"
     encoding: utf8
     collation: utf8_general_ci
 
   - name: "kalablog_drupalvm"
+    encoding: utf8
+    collation: utf8_general_ci
+
+  - name: "seven_drupalvm"
     encoding: utf8
     collation: utf8_general_ci
 
