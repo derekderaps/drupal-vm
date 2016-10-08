@@ -314,7 +314,7 @@ installed_extras:
   - nodejs
   - pimpmylog
   - redis
-  - ruby
+  # - ruby
   # - selenium
   - solr
   - varnish
