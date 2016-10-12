@@ -1,0 +1,52 @@
+---
+# Set a default sites path.
+sites_path: '~/Sites'
+
+# List non-UCSF sites.
+sites:
+  - dent
+  - eecs
+  - eight
+  - greenbiz
+  - kalablog
+  - kcom
+  - seven
+  - stamp
+  - trulymad
+  - usfi
+
+# List UCSF sites.
+ucsf:
+  - nursing
+  - silvermandigitallibrary
+
+# Add config to support PHP 5.6.
+# @see http://docs.drupalvm.com/en/latest/other/php-56/
+php_packages:
+  - php5
+  - php5-apcu
+  - php5-mcrypt
+  - php5-cli
+  - php5-common
+  - php5-curl
+  - php5-dev
+  - php5-fpm
+  - php5-gd
+  - php5-sqlite
+  - php-pear
+  - libpcre3-dev
+php_conf_paths:
+  - /etc/php5/fpm
+  - /etc/php5/apache2
+  - /etc/php5/cli
+php_extension_conf_paths:
+  - /etc/php5/fpm/conf.d
+  - /etc/php5/apache2/conf.d
+  - /etc/php5/cli/conf.d
+php_fpm_daemon: php5-fpm
+php_fpm_conf_path: "/etc/php5/fpm"
+php_fpm_pool_conf_path: "/etc/php5/fpm/pool.d/www.conf"
+php_mysql_package: php5-mysql
+php_redis_package: php5-redis
+xhprof_download_url: https://github.com/phacility/xhprof/archive/master.tar.gz
+xhprof_download_folder_name: xhprof-master
