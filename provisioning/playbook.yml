@@ -23,6 +23,10 @@
         - "{{ config_dir }}/config.yml"
         - "{{ config_dir }}/local.config.yml"
 
+    # Update Drupal VM configuration variables (synced folders, webhosts, and
+    # databases) with each of our sites in config.yml.
+    - include: tasks/sites.yml
+
     - include: tasks/init-debian.yml
       when: ansible_os_family == 'Debian'
     - include: tasks/init-redhat.yml
@@ -136,3 +140,6 @@
       include: "{{ item }}"
       with_fileglob:
         - "{{ post_provision_tasks_dir|default(omit) }}"
+
+    # Copy the UCSF local "sites.php" configuration file into place.
+    - include: tasks/ucsf-multsite.yml
