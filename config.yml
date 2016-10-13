@@ -16,7 +16,7 @@ sites:
   - usfi
 
 # List UCSF sites.
-ucsf:
+ucsf_multisites:
   - nursing
   - silvermandigitallibrary
 
