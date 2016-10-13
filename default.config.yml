@@ -165,7 +165,7 @@ nginx_remove_default_vhost: true
 nginx_ppa_use: true
 
 # MySQL databases and users.
-mysql_databases:
+mysql_databases: []
 #  - name: "{{ drupal_db_name }}"
 #    encoding: utf8mb4
 #    collation: utf8mb4_general_ci

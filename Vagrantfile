@@ -65,7 +65,7 @@ end
   }
   vconfig['nginx_hosts'] << {
     'server_name' => site + '.dvm',
-    'root'        => ucsf_multisites.include?(site) ? '/var/www/ucsf' : "/var/www/#{site}",
+    'root'        => vconfig['ucsf_multisites'].include?(site) ? '/var/www/ucsf' : "/var/www/#{site}",
     'is_php'      => 'true',
   }
 end
