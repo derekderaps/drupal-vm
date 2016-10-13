@@ -142,4 +142,4 @@
         - "{{ post_provision_tasks_dir|default(omit) }}"
 
     # Copy the UCSF local "sites.php" configuration file into place.
-    - include: tasks/ucsf-multsite.yml
+    - include: tasks/ucsf-multisite.yml
