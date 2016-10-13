@@ -19,64 +19,14 @@ vagrant_public_ip: ""
 # A list of synced folders, with the keys 'local_path', 'destination', and
 # a 'type' of [nfs|rsync|smb] (leave empty for slow native shares). See
 # http://docs.drupalvm.com/en/latest/extras/syncing-folders/ for more info.
-vagrant_synced_folders:
+vagrant_synced_folders: []
   # The first synced folder will be used for the default Drupal installation, if
   # any of the build_* settings are 'true'. By default the folder is set to
   # the drupal-vm folder.
-  - local_path: ~/Sites/dent
-    destination: /var/www/dent
-    type: nfs
-    create: true
-
-  - local_path: ~/Sites/eecs
-    destination: /var/www/eecs
-    type: nfs
-    create: true
-
-  - local_path: ~/Sites/eight
-    destination: /var/www/eight
-    type: nfs
-    create: true
-
-  - local_path: ~/Sites/greenbiz
-    destination: /var/www/greenbiz
-    type: nfs
-    create: true
-
-  - local_path: ~/Sites/kalablog
-    destination: /var/www/kalablog
-    type: nfs
-    create: true
-
-  - local_path: ~/Sites/kcom
-    destination: /var/www/kcom
-    type: nfs
-    create: true
-
-  - local_path: ~/Sites/seven
-    destination: /var/www/seven
-    type: nfs
-    create: true
-
-  - local_path: ~/Sites/stamp
-    destination: /var/www/stamp
-    type: nfs
-    create: true
-
-  - local_path: ~/Sites/trulymad
-    destination: /var/www/trulymad
-    type: nfs
-    create: true
-
-  - local_path: ~/Sites/ucsfp
-    destination: /var/www/ucsfp
-    type: nfs
-    create: true
-
-  - local_path: ~/Sites/usfi
-    destination: /var/www/usfi
-    type: nfs
-    create: true
+  #  - local_path: .
+  #    destination: /var/www/drupalvm
+  #    type: nfs
+  #    create: true
 
 # Memory and CPU to use for this VM.
 vagrant_memory: 1024
@@ -192,6 +142,9 @@ apache_mods_enabled:
 # here. Set the 'is_php' property for document roots that contain PHP apps like
 # Drupal.
 nginx_hosts:
+  #  - server_name: "{{ drupal_domain }} www.{{ drupal_domain }}"
+  #    root: "{{ drupal_core_path }}"
+  #    is_php: true
 
   - server_name: "adminer.{{ vagrant_hostname }}"
     root: "{{ adminer_install_dir }}"
@@ -208,105 +161,14 @@ nginx_hosts:
   - server_name: "{{ vagrant_ip }} dashboard.{{ vagrant_hostname }}"
     root: "{{ dashboard_install_dir }}"
 
-  - server_name: "dent.{{ vagrant_hostname }}"
-    root: "/var/www/dent"
-    is_php: true
-
-  - server_name: "eecs.{{ vagrant_hostname }}"
-    root: "/var/www/eecs"
-    is_php: true
-
-  - server_name: "ee.eecs.{{ vagrant_hostname }}"
-    root: "/var/www/eecs"
-    is_php: true
-
-  - server_name: "cs.eecs.{{ vagrant_hostname }}"
-    root: "/var/www/eecs"
-    is_php: true
-
-  - server_name: "eight.{{ vagrant_hostname }}"
-    root: "/var/www/eight"
-    is_php: true
-
-  - server_name: "greenbiz.{{ vagrant_hostname }}"
-    root: "/var/www/greenbiz"
-    is_php: true
-
-  - server_name: "gbz.{{ vagrant_hostname }}"
-    root: "/var/www/greenbiz"
-    is_php: true
-
-  - server_name: "kalablog.{{ vagrant_hostname }}"
-    root: "/var/www/kalablog"
-    is_php: true
-
-  - server_name: "kcom.{{ vagrant_hostname }}"
-    root: "/var/www/kcom"
-
-  - server_name: "seven.{{ vagrant_hostname }}"
-    root: "/var/www/seven"
-    is_php: true
-
-  - server_name: "stamp.{{ vagrant_hostname }}"
-    root: "/var/www/stamp"
-    is_php: true
-
-  - server_name: "trulymad.{{ vagrant_hostname }}"
-    root: "/var/www/trulymad"
-    is_php: true
-
-  - server_name: "ucsfp.{{ vagrant_hostname }}"
-    root: "/var/www/ucsfp/docroot"
-    is_php: true
-
-  - server_name: "usfi.{{ vagrant_hostname }}"
-    root: "/var/www/usfi"
-    is_php: true
-
 nginx_remove_default_vhost: true
 nginx_ppa_use: true
 
 # MySQL databases and users.
 mysql_databases:
-  - name: "dent_{{ drupal_db_name }}"
-    encoding: utf8mb4
-    collation: utf8mb4_general_ci
-
-  - name: "eecs_{{ drupal_db_name }}"
-    encoding: utf8mb4
-    collation: utf8mb4_general_ci
-
-  - name: "eight_{{ drupal_db_name }}"
-    encoding: utf8mb4
-    collation: utf8mb4_general_ci
-
-  - name: "greenbiz_{{ drupal_db_name }}"
-    encoding: utf8mb4
-    collation: utf8mb4_general_ci
-
-  - name: "kalablog_{{ drupal_db_name }}"
-    encoding: utf8mb4
-    collation: utf8mb4_general_ci
-
-  - name: "seven_{{ drupal_db_name }}"
-    encoding: utf8mb4
-    collation: utf8mb4_general_ci
-
-  - name: "stamp_{{ drupal_db_name }}"
-    encoding: utf8mb4
-    collation: utf8mb4_general_ci
-
-  - name: "trulymad_{{ drupal_db_name }}"
-    encoding: utf8mb4
-    collation: utf8mb4_general_ci
-
-  - name: "ucsfp_{{ drupal_db_name }}"
-    encoding: utf8mb4
-    collation: utf8mb4_general_ci
-
-  - name: "usfi_{{ drupal_db_name }}"
-    encoding: utf8mb4
-    collation: utf8mb4_general_ci
+#  - name: "{{ drupal_db_name }}"
+#    encoding: utf8mb4
+#    collation: utf8mb4_general_ci
 
 mysql_users:
   - name: "{{ drupal_db_user }}"
@@ -333,7 +195,7 @@ installed_extras:
   # - elasticsearch
   # - java
   - mailhog
-  # - memcached
+  - memcached
   # - newrelic
   - nodejs
   - pimpmylog
@@ -384,37 +246,6 @@ php_opcache_max_accelerated_files: 4096
 php_max_input_vars: "4000"
 php_max_execution_time: "900"
 
-# Added to support PHP 5.6.
-# @see http://docs.drupalvm.com/en/latest/other/php-56/
-php_packages:
-  - php5
-  - php5-apcu
-  - php5-mcrypt
-  - php5-cli
-  - php5-common
-  - php5-curl
-  - php5-dev
-  - php5-fpm
-  - php5-gd
-  - php5-sqlite
-  - php-pear
-  - libpcre3-dev
-php_conf_paths:
-  - /etc/php5/fpm
-  - /etc/php5/apache2
-  - /etc/php5/cli
-php_extension_conf_paths:
-  - /etc/php5/fpm/conf.d
-  - /etc/php5/apache2/conf.d
-  - /etc/php5/cli/conf.d
-php_fpm_daemon: php5-fpm
-php_fpm_conf_path: "/etc/php5/fpm"
-php_fpm_pool_conf_path: "/etc/php5/fpm/pool.d/www.conf"
-php_mysql_package: php5-mysql
-php_redis_package: php5-redis
-xhprof_download_url: https://github.com/phacility/xhprof/archive/master.tar.gz
-xhprof_download_folder_name: xhprof-master
-
 # Drupal VM defaults to using PHP-FPM with either Apache or Nginx. If you wish
 # to instead use Apache + mod_php with an Ubuntu base box, make sure you add
 # libapache2-mod-php7.0 to `extra_packages` elsewhere in this config file.
@@ -435,7 +266,7 @@ post_provision_scripts: []
   # - "../examples/scripts/configure-solr.sh"
 
 # MySQL Configuration.
-mysql_root_password: root
+mysql_root_password:
 mysql_slow_query_log_enabled: true
 mysql_slow_query_time: 2
 mysql_wait_timeout: 300
