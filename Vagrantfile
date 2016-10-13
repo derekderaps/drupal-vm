@@ -44,6 +44,32 @@ vconfig = YAML.load_file("#{host_drupalvm_dir}/default.config.yml")
   end
 end
 
+# Programmatically add synced folders for all sites, plus one for the UCSF
+# multisite, sorted alphabetically.
+(vconfig['sites'] + ['ucsf']).sort.each do |site|
+  vconfig['vagrant_synced_folders'] << {
+    'local_path'  => "#{vconfig['sites_path']}/#{site}",
+    'destination' => "/var/www/#{site}",
+    'type'        => 'nfs',
+    'create'      => 'true',
+  }
+end
+
+# Programmatically add databases and webhosts for all regular sites and UCSF
+# multisites, sorted alphabetically.
+(vconfig['sites'] + vconfig['ucsf_multisites']).sort.each do |site|
+  vconfig['mysql_databases'] << {
+    'name'      => site + '_drupalvm',
+    'encoding'  => 'utf8mb4',
+    'collation' => 'utf8mb4_general_ci',
+  }
+  vconfig['nginx_hosts'] << {
+    'server_name' => site + '.dvm',
+    'root'        => ucsf_multisites.include?(site) ? '/var/www/ucsf' : "/var/www/#{site}",
+    'is_php'      => 'true',
+  }
+end
+
 # Replace jinja variables in config.
 vconfig = walk(vconfig) do |value|
   while value.is_a?(String) && value.match(/{{ .* }}/)
