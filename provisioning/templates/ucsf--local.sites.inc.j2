@@ -1,0 +1,10 @@
+<?php
+
+/**
+ * @file
+ * Sites configuration to map local domains to UCSF directories.
+ */
+
+{% for site in ucsf_multisites -%}
+  $sites['{{ site }}.dvm'] = '{{ site }}.ucsf.edu';
+{% endfor %}
