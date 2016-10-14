@@ -195,7 +195,7 @@ installed_extras:
   # - elasticsearch
   # - java
   - mailhog
-  # - memcached
+  - memcached
   # - newrelic
   - nodejs
   - pimpmylog
