@@ -195,7 +195,7 @@ installed_extras:
   # - elasticsearch
   # - java
   - mailhog
-  # - memcached
+  - memcached
   # - newrelic
   - nodejs
   - pimpmylog
@@ -203,7 +203,7 @@ installed_extras:
   # - ruby
   # - selenium
   - solr
-  - varnish
+  # - varnish
   - xdebug
   - xhprof
 
