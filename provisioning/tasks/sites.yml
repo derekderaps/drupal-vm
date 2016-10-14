@@ -8,7 +8,7 @@
   with_items: "{{ (sites + ['ucsf'])|sort }}"
   set_fact:
     vagrant_synced_folders: "{{ vagrant_synced_folders|union([{
-      'local_path':  sites_path + '/' + item,
+      'local_path':  sites_path + '/ucsf/docroot' if 'ucsf' == item else sites_path + '/' + item,
       'destination': '/var/www/' + item,
       'type':        'nfs',
       'create':      true,

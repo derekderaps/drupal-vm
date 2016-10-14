@@ -47,8 +47,16 @@ end
 # Programmatically add synced folders for all sites, plus one for the UCSF
 # multisite, sorted alphabetically.
 (vconfig['sites'] + ['ucsf']).sort.each do |site|
+
+  # Determine the location of the repo on the host.
+  site_path = vconfig['sites_path'] + '/' + site
+
+  # The UCSF Drupal installation lives in a subfolder of the repo root.
+  site_path << '/docroot' if 'ucsf' == site
+
+  # Add the synced folder config to the list.
   vconfig['vagrant_synced_folders'] << {
-    'local_path'  => "#{vconfig['sites_path']}/#{site}",
+    'local_path'  => site_path,
     'destination' => "/var/www/#{site}",
     'type'        => 'nfs',
     'create'      => 'true',
