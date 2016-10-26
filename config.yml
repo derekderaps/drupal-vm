@@ -20,9 +20,6 @@ ucsf_multisites:
   - nursing
   - silvermandigitallibrary
 
-# Set a sane default; assumes host machine has 4G of memory.
-vagrant_memory: 2048
-
 # Add config to support PHP 5.6.
 # @see http://docs.drupalvm.com/en/latest/other/php-56/
 php_install_recommends: no
