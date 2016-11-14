@@ -78,6 +78,15 @@ end
   }
 end
 
+# Programmatically add webhosts for EECS subdomains.
+['ee', 'cs'].each do |subdomain|
+  vconfig['nginx_hosts'] << {
+    'server_name' => "#{subdomain}.eecs.dvm",
+    'root'        => '/var/www/eecs',
+    'is_php'      => 'true',
+  }
+end
+
 # Replace jinja variables in config.
 vconfig = walk(vconfig) do |value|
   while value.is_a?(String) && value.match(/{{ .* }}/)

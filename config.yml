@@ -4,10 +4,12 @@ sites_path: '~/Sites'
 
 # List non-UCSF sites.
 sites:
+  - behat
   - dent
   - eecs
   - eight
   - greenbiz
+  - hsa
   - kalablog
   - kcom
   - seven

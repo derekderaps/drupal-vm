@@ -28,3 +28,15 @@
       'root':        '/var/www/ucsf' if item in ucsf_multisites else '/var/www/' + item,
       'is_php':      true,
     }]) }}"
+
+- name: Programmatically add webhosts for EECS subdomains.
+    and UCSF multisites, sorted alphabetically.
+  with_items:
+    - ee
+    - cs
+  set_fact:
+    nginx_hosts: "{{ nginx_hosts|union([{
+      'server_name': item + '.eecs.dvm',
+      'root':        '/var/www/eecs',
+      'is_php':      true,
+    }]) }}"
