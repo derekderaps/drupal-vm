@@ -12,8 +12,6 @@ Ondřej Surý's PPA for PHP 7.0 is used to install PHP 7, but you can switch to 
 vagrant_box: geerlingguy/ubuntu1404
 php_version: "5.6"
 php_install_recommends: no
-php_version: "5.6"
-php_install_recommends: no
 php_packages:
   - php5.6
   - php5.6-apcu
@@ -27,7 +25,6 @@ php_packages:
   - php5.6-sqlite3
   - php5.6-xml
   - php5.6-mbstring
-  - php-pear
   - libpcre3-dev
 php_conf_paths:
   - /etc/php/5.6/fpm
@@ -53,6 +50,9 @@ php_redis_package: php5.6-redis
 
 # If you install `memcached`:
 php_memcached_package: php5.6-memcached
+
+# If you have `drupalvm_database` set to `pgsql`:
+php_pgsql_package: php5.6-pgsql
 
 # If you install `xhprof`:
 xhprof_download_url: https://github.com/phacility/xhprof/archive/master.tar.gz
