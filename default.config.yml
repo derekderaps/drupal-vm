@@ -33,8 +33,8 @@ vagrant_memory: 2048
 vagrant_cpus: 1
 
 # Minimum required versions.
-drupalvm_vagrant_version_min: '1.8.5'
-drupalvm_ansible_version_min: '2.1'
+drupalvm_vagrant_version_min: '1.8.6'
+drupalvm_ansible_version_min: '2.2'
 
 # Force use of ansible_local provisioner, even if Ansible is installed on host.
 force_ansible_local: false
@@ -90,8 +90,8 @@ drupal_site_install_extra_args: []
 # Cron jobs are added to the vagrant user's crontab. Keys include name
 # (required), minute, hour, day, weekday, month, job (required), and state.
 drupalvm_cron_jobs: []
-  # - name: "Drupal Cron",
-  #   minute: "*/30",
+  # - name: "Drupal Cron"
+  #   minute: "*/30"
   #   job: "drush -r {{ drupal_core_path }} core-cron"
 
 # Drupal VM automatically creates a drush alias file in your ~/.drush folder if
@@ -192,6 +192,7 @@ installed_extras:
   - adminer
   # - blackfire
   - drupalconsole
+  - drush
   # - elasticsearch
   # - java
   - mailhog
@@ -214,7 +215,7 @@ extra_packages:
 # You can configure almost anything else on the server in the rest of this file.
 extra_security_enabled: false
 
-drush_version: "master"
+drush_version: "8.x"
 drush_keep_updated: true
 drush_composer_cli_options: "--prefer-dist --no-interaction"
 
@@ -303,7 +304,7 @@ php_xdebug_idekey: PHPSTORM
 php_xdebug_max_nesting_level: 256
 
 # Solr Configuration (if enabled above).
-solr_version: "5.5.2"
+solr_version: "5.5.3"
 solr_xms: "64M"
 solr_xmx: "128M"
 

@@ -4,6 +4,9 @@ repo_url: https://github.com/geerlingguy/drupal-vm
 site_description: 'Drupal VM - A VM for local Drupal development, built with Vagrant + Ansible'
 theme: readthedocs
 
+extra_javascript:
+  - js/fix_search.js
+
 markdown_extensions:
   - toc:
       permalink: True
@@ -40,6 +43,7 @@ pages:
     - 'PHP 5.6 on Drupal VM': 'other/php-56.md'
     - 'BigPipe with Drupal VM': 'other/bigpipe.md'
     - 'Drupal VM Management Tools': 'other/management-tools.md'
+    - 'Deploying Drupal VM to a production environment': 'other/production.md'
     - 'Networking Notes': 'other/networking.md'
     - 'Drupal 6 Notes': 'other/drupal-6.md'
     - 'Linux Notes': 'other/linux.md'
