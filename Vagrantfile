@@ -46,38 +46,60 @@ vconfig = YAML.load_file("#{host_drupalvm_dir}/default.config.yml")
   end
 end
 
-# Programmatically add synced folders for all sites, plus one for the UCSF
-# multisite, sorted alphabetically.
-(vconfig['sites'] + ['ucsf']).sort.each do |site|
-
-  # Determine the location of the repo on the host.
-  site_path = vconfig['sites_path'] + '/' + site
-
-  # The UCSF Drupal installation lives in a subfolder of the repo root.
-  site_path << '/docroot' if 'ucsf' == site
-
-  # Add the synced folder config to the list.
-  vconfig['vagrant_synced_folders'] << {
-    'local_path'  => site_path,
-    'destination' => "/var/www/#{site}",
-    'type'        => 'nfs',
-    'create'      => 'true',
-  }
-end
-
-# Programmatically add databases and webhosts for all regular sites and UCSF
-# multisites, sorted alphabetically.
-(vconfig['sites'] + vconfig['ucsf_multisites']).sort.each do |site|
+# Add a database to the Drupal VM config.
+def kaladvm_add_db(database)
   vconfig['mysql_databases'] << {
-    'name'      => site + '_drupalvm',
+    'name'      => "#{database}_drupalvm",
     'encoding'  => 'utf8mb4',
     'collation' => 'utf8mb4_general_ci',
   }
-  vconfig['nginx_hosts'] << {
-    'server_name' => site + '.dvm',
-    'root'        => vconfig['ucsf_multisites'].include?(site) ? '/var/www/ucsf' : "/var/www/#{site}",
+end
+
+# Add a webhost to the Drupal VM config.
+def kaladvm_add_host(site, subsite = nil)
+
+  # Are we are making a subsite?
+  host = subsite.nil? ? site : "#{subsite}.#{site}"
+
+  # Determine whether to use apache or nginx.
+  server = vconfig['drupalvm_webserver'] === 'nginx' ? 'nginx_hosts' : 'apache_vhosts'
+
+  # Add the webhost.
+  vconfig[server] << {
+    'server_name' => "#{host}.dvm",
+    'root'        => "/var/www/#{site}",
     'is_php'      => 'true',
   }
+end
+
+# Programmatically add synced folder, database, and virtualhost for each site.
+vconfig['sites'].each do |webroot, sites|
+  sites.each do |site|
+
+    # Determine the location of the repo on the host.
+    site_path = vconfig['sites_path'] + '/' + site + webroot
+
+    # Add the synced folder config to the list.
+    vconfig['vagrant_synced_folders'] << {
+      'local_path'  => site_path,
+      'destination' => "/var/www/#{site}",
+      'type'        => 'nfs',
+      'create'      => 'true',
+    }
+
+    # Is this site a multisite?
+    if vconfig['multisites'].key?(site)
+      vconfig['multisites'][site].each do |subsite|
+        kaladvm_add_db("#{site}_#{subsite}")
+        kaladvm_add_host(site, subsite)
+      end
+
+    # This site is not a multisite.
+    else
+      kaladvm_add_db(site)
+      kaladvm_add_host(site)
+    end
+  end
 end
 
 # Programmatically add webhosts for EECS subdomains.
