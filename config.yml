@@ -25,8 +25,15 @@ sites:
     - poets
     - ucsf
 
-# List multisites.
+# List multisites / sub-domains.
+# @TODO break multisites and just extra sub-domains into separate variables so
+# that we can know which need `sites.php` config (the former) and which don't
+# (the latter). The `ucsf-multisite.yml` task and `ucsf--local.sites.inc.j2`
+# template are currently hard-coded to act on the UCSF site only.
 multisites:
+  eecs:
+    - ee
+    - cs
   ucsf:
     - nursing
     - silvermandigitallibrary
