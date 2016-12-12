@@ -1,0 +1,24 @@
+apache_vhosts:
+<%= vconfig['apache_vhosts'].to_yaml.gsub("---\n", '') %>
+<% vconfig['sites'].each do |site| %>
+- servername:   "<%= site %>.{{ drupal_domain }}"
+  documentroot: "/var/www/<%= site %>"
+  extra_parameters: |
+    ProxyPassMatch ^/(.*\.php(/.*)?)$ "fcgi://127.0.0.1:9000{{ /var/www/<%= site %> }}"
+<% end %>
+
+nginx_hosts:
+<%= vconfig['nginx_hosts'].to_yaml.gsub("---\n", '') %>
+<% vconfig['sites'].each do |site| %>
+- server_name: "<%= site %>.{{ drupal_domain }}"
+  root:        "/var/www/<%= site %>"
+  is_php:      true
+<% end %>
+
+mysql_databases:
+<%= vconfig['mysql_databases'].to_yaml.gsub("---\n", '') %>
+<% vconfig['sites'].each do |site| %>
+- name:      "<%= site %>_drupalvm"
+  encoding:  utf8mb4
+  collation: utf8mb4_general_ci
+<% end %>

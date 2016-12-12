@@ -1,0 +1,4 @@
+- local_path:  <%= vconfig['sites_path'] + '/' + site + webroot %>
+  destination: /var/www/<%= vconfig['site'] %>
+  type:        nfs
+  create:      true

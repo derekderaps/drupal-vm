@@ -1,0 +1,28 @@
+apache_vhosts:
+  - servername: "<%= vconfig['drupal_domain'] %>"
+    serveralias: "www.<%= vconfig['drupal_domain'] %>"
+    documentroot: "<%= vconfig['drupal_core_path'] %>"
+    extra_parameters: |
+          ProxyPassMatch ^/(.*\.php(/.*)?)$ "fcgi://127.0.0.1:9000<%= vconfig['drupal_core_path'] %>"
+
+  - servername: "adminer.<%= vconfig['vagrant_hostname'] %>"
+    documentroot: "<%= vconfig['adminer_install_dir'] %>"
+    extra_parameters: |
+          ProxyPassMatch ^/(.*\.php(/.*)?)$ "fcgi://127.0.0.1:9000<%= vconfig['adminer_install_dir'] %>"
+
+  - servername: "xhprof.<%= vconfig['vagrant_hostname'] %>"
+    documentroot: "<%= vconfig['php_xhprof_html_dir'] %>"
+    extra_parameters: |
+          ProxyPassMatch ^/(.*\.php(/.*)?)$ "fcgi://127.0.0.1:9000<%= vconfig['php_xhprof_html_dir'] %>"
+
+  - servername: "pimpmylog.<%= vconfig['vagrant_hostname'] %>"
+    documentroot: "<%= vconfig['pimpmylog_install_dir'] %>"
+    extra_parameters: |
+          ProxyPassMatch ^/(.*\.php(/.*)?)$ "fcgi://127.0.0.1:9000<%= vconfig['pimpmylog_install_dir'] %>"
+
+  - servername: "<%= vconfig['vagrant_ip '] %>"
+    serveralias: "dashboard.<%= vconfig['vagrant_hostname'] %>"
+    documentroot: "<%= vconfig['dashboard_install_dir'] %>"
+    extra_parameters: |
+          ProxyPassMatch ^/(.*\.php(/.*)?)$ "fcgi://127.0.0.1:9000<%= vconfig['dashboard_install_dir'] %>"
+          DirectoryIndex index.html

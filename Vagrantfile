@@ -46,58 +46,51 @@ vconfig = YAML.load_file("#{host_drupalvm_dir}/default.config.yml")
   end
 end
 
-# Add a database to the Drupal VM config.
-def kaladvm_add_db(database)
-  vconfig['mysql_databases'] << {
-    'name'      => "#{database}_drupalvm",
-    'encoding'  => 'utf8mb4',
-    'collation' => 'utf8mb4_general_ci',
-  }
+require 'erb'
+# puts renderer.result(binding)
+
+sites_config = {
+  vagrant_synced_folders: '',
+  apache_vhosts: '',
+  nginx_hosts: '',
+  mysql_databases: ''
+}
+renderer = {}
+sites_config.each do |key, value|
+  renderer[key] = File.read("templates/#{key}.erb")
 end
 
-# Add a webhost to the Drupal VM config.
-def kaladvm_add_host(site, subsite = nil)
-
-  # Are we are making a subsite?
-  host = subsite.nil? ? site : "#{subsite}.#{site}"
-
-  # Determine whether to use apache or nginx.
-  server = vconfig['drupalvm_webserver'] === 'nginx' ? 'nginx_hosts' : 'apache_vhosts'
-
-  # Add the webhost.
-  vconfig[server] << {
-    'server_name' => "#{host}.dvm",
-    'root'        => "/var/www/#{site}",
-    'is_php'      => 'true',
-  }
-end
-
-# Programmatically add synced folder, database, and virtualhost for each site.
+# Programmatically add synced folder, database, and virtualhosts for each site.
 vconfig['sites'].each do |webroot, sites|
   sites.each do |site|
 
     # Determine the location of the repo on the host.
     site_path = vconfig['sites_path'] + '/' + site + webroot
+    sites_config[:vagrant_synced_folders] << renderer[:vagrant_synced_folders].result(binding)
 
-    # Add the synced folder config to the list.
-    vconfig['vagrant_synced_folders'] << {
-      'local_path'  => site_path,
-      'destination' => "/var/www/#{site}",
-      'type'        => 'nfs',
-      'create'      => 'true',
+    # Add a database to the Drupal VM config.
+    kaladvm_add_db(site)
+    kaladvm_add_db("#{site}_#{subsite}")
+    vconfig['mysql_databases'] << {
+      'name'      => "#{database}_drupalvm",
+      'encoding'  => 'utf8mb4',
+      'collation' => 'utf8mb4_general_ci',
     }
 
+    # Add a webhost to the Drupal VM config.
+    hosts = []
     # Is this site a multisite?
     if vconfig['multisites'].key?(site)
       vconfig['multisites'][site].each do |subsite|
-        kaladvm_add_db("#{site}_#{subsite}")
-        kaladvm_add_host(site, subsite)
+        hosts << "#{subsite}.#{site}"
       end
-
     # This site is not a multisite.
     else
-      kaladvm_add_db(site)
-      kaladvm_add_host(site)
+      hosts << site
+    end
+    hosts.each |host| do
+      sites_config[:apache_vhosts] << renderer[:apache_vhosts].result(binding)
+      sites_config[:nginx_hosts]   << renderer[:nginx_hosts].result(binding)
     end
   end
 end
