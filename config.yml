@@ -20,7 +20,7 @@ sites:
   /web:
     - drupal-project
     - kalablog8
-    - progenity
+    - progmi
   /docroot:
     - poets
     - ucsf
