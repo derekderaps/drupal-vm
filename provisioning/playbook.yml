@@ -22,11 +22,8 @@
       with_fileglob:
         - "{{ config_dir }}/config.yml"
         - "{{ config_dir }}/local.config.yml"
+        - "{{ config_dir }}/sites.config.yml"
         - "{{ config_dir }}/{{ lookup('env', 'DRUPALVM_ENV')|default(drupalvm_env, true)|default(ansible_env.DRUPALVM_ENV)|default(omit) }}.config.yml"
-
-    # Update Drupal VM configuration variables (synced folders, webhosts, and
-    # databases) with each of our sites in config.yml.
-    - include: tasks/sites.yml
 
     - include: tasks/init-debian.yml
       when: ansible_os_family == 'Debian'

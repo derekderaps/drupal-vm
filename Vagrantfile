@@ -46,69 +46,82 @@ vconfig = YAML.load_file("#{host_drupalvm_dir}/default.config.yml")
   end
 end
 
-# Add a database to the Drupal VM config.
-def kaladvm_add_db(database)
-  vconfig['mysql_databases'] << {
-    'name'      => "#{database}_drupalvm",
-    'encoding'  => 'utf8mb4',
-    'collation' => 'utf8mb4_general_ci',
-  }
-end
-
-# Add a webhost to the Drupal VM config.
-def kaladvm_add_host(site, subsite = nil)
-
-  # Are we are making a subsite?
-  host = subsite.nil? ? site : "#{subsite}.#{site}"
-
-  # Determine whether to use apache or nginx.
-  server = vconfig['drupalvm_webserver'] === 'nginx' ? 'nginx_hosts' : 'apache_vhosts'
-
-  # Add the webhost.
-  vconfig[server] << {
-    'server_name' => "#{host}.dvm",
-    'root'        => "/var/www/#{site}",
-    'is_php'      => 'true',
-  }
-end
-
 # Programmatically add synced folder, database, and virtualhost for each site.
 vconfig['sites'].each do |webroot, sites|
   sites.each do |site|
 
-    # Determine the location of the repo on the host.
-    site_path = vconfig['sites_path'] + '/' + site + webroot
+    # Formulate the path of the site's webroot in the VM, for use below.
+    guest_path = "/var/www/#{site}"
 
-    # Add the synced folder config to the list.
+    # Append a synced folder for this site to the config's list of existing
+    # synced folders.
     vconfig['vagrant_synced_folders'] << {
-      'local_path'  => site_path,
-      'destination' => "/var/www/#{site}",
+      'local_path'  => vconfig['sites_path'] + '/' + site + webroot,
+      'destination' => guest_path,
       'type'        => 'nfs',
       'create'      => 'true',
     }
 
-    # Is this site a multisite?
+    # Generate the list of hosts and databases, including those needed for
+    # multisites.
+    hosts     = [ site ]
+    databases = [ site ]
     if vconfig['multisites'].key?(site)
       vconfig['multisites'][site].each do |subsite|
-        kaladvm_add_db("#{site}_#{subsite}")
-        kaladvm_add_host(site, subsite)
+        hosts     << "#{subsite}.#{site}"
+        databases << "#{site}_#{subsite}"
       end
+    end
 
-    # This site is not a multisite.
-    else
-      kaladvm_add_db(site)
-      kaladvm_add_host(site)
+    # Add an apache/nginx virtualhost entry for each site/subsite.
+    hosts.each do |host|
+      case vconfig['drupalvm_webserver']
+      when 'apache'
+        vconfig['apache_vhosts'] << {
+          'servername'       => "#{host}.{{ vagrant_hostname }}",
+          'documentroot'     => guest_path,
+          'extra_parameters' => "ProxyPassMatch ^/(.*\.php(/.*)?)$ \"fcgi://127.0.0.1:9000#{guest_path}\""
+        }
+      when 'nginx'
+        vconfig['nginx_hosts'] << {
+          'server_name' => "#{host}.{{ vagrant_hostname }}",
+          'root'        => guest_path,
+          'is_php'      => 'true',
+        }
+      else
+        abort('ERROR: Set the "drupalvm_webserver" config to either "apache" or "nginx".')
+      end
+    end
+
+    # Add a database for each site/subsite.
+    databases.each do |database|
+      vconfig['mysql_databases'] << {
+        'name'      => "#{database}_drupalvm",
+        'encoding'  => 'utf8mb4',
+        'collation' => 'utf8mb4_general_ci',
+      }
     end
   end
 end
 
-# Programmatically add webhosts for EECS subdomains.
-['ee', 'cs'].each do |subdomain|
-  vconfig['nginx_hosts'] << {
-    'server_name' => "#{subdomain}.eecs.dvm",
-    'root'        => '/var/www/eecs',
-    'is_php'      => 'true',
-  }
+# List the config variables we have changed.
+sites_config_keys = [
+  'vagrant_synced_folders',
+  'apache_vhosts',
+  'nginx_hosts',
+  'mysql_databases'
+]
+
+# Create a subset of the config hash that only contains those variables we have
+# changed.
+sites_config = vconfig.select { |key|
+  sites_config_keys.include? key
+}
+
+# Output our config overrides to `sites.config.yml` so that Ansible will know
+# about them in the provisioning step.
+File.open('sites.config.yml', 'w') do |file|
+  file << sites_config.to_yaml
 end
 
 # Replace jinja variables in config.
