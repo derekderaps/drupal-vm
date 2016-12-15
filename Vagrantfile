@@ -56,7 +56,7 @@ vconfig['sites'].each do |webroot, sites|
     # Append a synced folder for this site to the config's list of existing
     # synced folders.
     vconfig['vagrant_synced_folders'] << {
-      'local_path'  => vconfig['sites_path'] + '/' + site + webroot,
+      'local_path'  => vconfig['sites_path'] + '/' + site,
       'destination' => guest_path,
       'type'        => 'nfs',
       'create'      => 'true',
@@ -79,13 +79,13 @@ vconfig['sites'].each do |webroot, sites|
       when 'apache'
         vconfig['apache_vhosts'] << {
           'servername'       => "#{host}.{{ vagrant_hostname }}",
-          'documentroot'     => guest_path,
-          'extra_parameters' => "ProxyPassMatch ^/(.*\.php(/.*)?)$ \"fcgi://127.0.0.1:9000#{guest_path}\""
+          'documentroot'     => guest_path + webroot,
+          'extra_parameters' => "ProxyPassMatch ^/(.*\.php(/.*)?)$ \"fcgi://127.0.0.1:9000#{guest_path + webroot}\""
         }
       when 'nginx'
         vconfig['nginx_hosts'] << {
           'server_name' => "#{host}.{{ vagrant_hostname }}",
-          'root'        => guest_path,
+          'root'        => guest_path + webroot,
           'is_php'      => 'true',
         }
       else
