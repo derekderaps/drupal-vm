@@ -2,7 +2,7 @@
 # Create the local "sites.php" file for the UCSF multisite.
 
 - name: See if the UCSF repo exists.
-  shell: "test -d /var/www/ucsf/sites"
+  shell: "test -d /var/www/ucsf/docroot/sites"
   register: ucsf_exists
   ignore_errors: yes
 
@@ -10,5 +10,5 @@
   when: ucsf_exists.rc == 0
   template:
     src: ../templates/ucsf--local.sites.inc.j2
-    dest: /var/www/ucsf/sites/local.sites.inc
+    dest: /var/www/ucsf/docroot/sites/local.sites.inc
     mode: 0644
