@@ -1,5 +1,82 @@
 # Drupal VM Changelog
 
+## 4.1.1 (2016-12-30)
+
+### Bugfixes
+
+  * #1093: Install correct version of Apache on Ubuntu 12.04 and 14.04 for `SetHandler`.
+
+
+## 4.1.0 "Anthem" (2016-12-30)
+
+### Breaking Changes
+
+  * N/A
+
+### New/changed variables in default.config.yml
+
+  * There's a new `apache_vhost_php_fpm_parameters` variable that defines the PHP-FPM handler Apache uses per-virtualhost. The old `extra_parameters` pre-4.1.0 will continue to work, but the new `SetHandler` technique is better for most scenarios than using `ProxyPassMatch`.
+  * The Dashboard entry in `nginx_hosts` now has `is_php: true`.
+
+### Improvements
+
+  * #617: Switch to `SetHandler` instead of `ProxyPassMatch` (fixes #617, #876, #945, #1055).
+  * #1090: Update docs to reference `SetHandler`.
+  * #1047: Add docs on Drupal Console remote command execution.
+  * #1076: Update PHP XDebug role to latest version
+  * #1067: Configure hostname for environments other than VMs.
+  * #1068: Add php-yaml extension.
+  * #1078: Move Ansible version check to Vagrantfile for better UX.
+  * #1071: Improve docs for SSL under Apache and Nginx.
+  * #455: Move prod readme to docs instead of README file.
+
+### Bugfixes
+
+  * #1076: Fix PHP modules not re-compiling on PHP version changes.
+  * #1061: Allow user defined post-provision-tasks to use tags.
+  * #1060: Fix bug where dashboard assumes optional vhost docroot is defined.
+  * #1062: Allow post-provision tasks to use the item variable.
+  * #1059: Fix hostsupdater trying to add wildcard aliases.
+  * #1054: Update Solr role to prevent permissions error.
+
+
+## 4.0.0 "We've Got Company" (2016-12-10)
+
+### Breaking Changes
+
+  * Drush is now an optional `installed_extra`. **If you use Drush, and it's not installed as part of your own project's dependencies**, make sure you add `drush` as one of the `installed_extras` in your `config.yml`.
+  * Vagrant 1.8.6 or later, VirtualBox 5.1.10 or later, and Ansible 2.2.0 or later (if installed on host) are now required.
+  * PHP 7.0 is still the default, but **you can install PHP 7.1**, or **switch to PHP 5.6** on-the-fly, thanks to #1043—on any supported OS! See the updated docs: [Using other versions of PHP](http://docs.drupalvm.com/en/latest/other/php/)
+
+### New/changed variables in default.config.yml
+
+  * `drush` is now a default item in `installed_extras`.
+  * `upload-progress` is now an optional item in `installed_extras`.
+  * `drush_version` now defaults to `8.x` (`master` was causing issues with Drupal < 8).
+  * `php_install_recommends` was removed from the default set of variables.
+  * `solr_version` was bumped to `5.5.3` (was `5.5.2`).
+
+### Improvements
+
+  * #1043: Make switching PHP versions easier, and add support for PHP 7.1.
+  * #711: Make Drush optional.
+  * #788: Add optional PHP upload_progress support.
+  * #992: Add optional `DRUPALVM_ANSIBLE_ARGS` support for Ansible CLI options.
+  * #1002: Allow shallow Drush clones for faster builds.
+  * #1007, #1009: Added a GitHub ISSUE_TEMPLATE to help my sanity.
+  * #1018: Fix Solr versioning error in Solr role.
+  * #823: Set composer.json type to `vm` instead of `project`.
+  * Update following Ansible roles to newer versions: Solr, Nginx, Git, PHP, Firewall, Apache, PHP-XDebug, PHP-Redis.
+
+### Bugfixes
+
+  * #981: Bump minimum required Vagrant and VirtualBox versions.
+  * #1014: Fix path in extra tasks example.
+  * #1020: Switch to Drush `8.x` branch (instead of `master`/`9.x`) for Drupal 6/7 compatibility.
+  * #1004: Add note about `php_pgsql_package` for PHP 5.6 (superceded by later work).
+  * #1037: Fix Acquia configuration example for PHP 5.6 (superceded by later work).
+
+
 ## 3.5.2 (2016-11-17)
 
 ### Improvements
