@@ -22,6 +22,9 @@ sites:
     - drupal-project
     - kalablog8
     - progmi
+  /www:
+    - accelerate
+    - ctsi
   /docroot:
     - poets
     - ucsf
@@ -38,3 +41,6 @@ multisites:
   ucsf:
     - nursing
     - silvermandigitallibrary
+  ctsi:
+    - open-proposals
+    - mosaic
