@@ -22,6 +22,9 @@ sites:
     - drupal-project
     - kalablog8
     - progmi
+  /www:
+    - accelerate
+    - ctsi
   /docroot:
     - poets
     - ucsf
@@ -38,6 +41,9 @@ multisites:
   ucsf:
     - nursing
     - silvermandigitallibrary
+  ctsi:
+    - open-proposals
+    - mosaic
 
 # Add config to support PHP 5.6.
 # @see http://docs.drupalvm.com/en/latest/other/php-56/
