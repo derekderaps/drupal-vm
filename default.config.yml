@@ -4,6 +4,7 @@
 vagrant_box: geerlingguy/ubuntu1604
 vagrant_user: vagrant
 vagrant_synced_folder_default_type: nfs
+vagrant_gui: false
 
 # If you need to run multiple instances of Drupal VM, set a unique hostname,
 # machine name, and IP address for each instance.
@@ -90,9 +91,6 @@ drupal_site_install_extra_args: []
 # Cron jobs are added to the vagrant user's crontab. Keys include name
 # (required), minute, hour, day, weekday, month, job (required), and state.
 drupalvm_cron_jobs: []
-  # - name: "Drupal Cron"
-  #   minute: "*/30"
-  #   job: "drush -r {{ drupal_core_path }} core-cron"
 
 # Drupal VM automatically creates a drush alias file in your ~/.drush folder if
 # this variable is 'true'.
@@ -236,9 +234,11 @@ firewall_allowed_tcp_ports:
   - "8983"
   - "9200"
 firewall_log_dropped_packets: false
+firewall_disable_firewalld: true
+firewall_disable_ufw: true
 
 # PHP Configuration. Currently-supported versions: 5.6, 7.0, 7.1.
-# See version-specific notes: http://docs.drupalvm.com/en/latest/other/php/
+# See version-specific notes: http://docs.drupalvm.com/en/latest/configurations/php/
 php_version: "7.0"
 php_install_recommends: no
 php_memory_limit: "192M"
