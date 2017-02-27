@@ -197,7 +197,7 @@ installed_extras:
   # - elasticsearch
   # - java
   - mailhog
-  - memcached
+  # - memcached
   # - newrelic
   - nodejs
   - pimpmylog
@@ -205,10 +205,10 @@ installed_extras:
   # - ruby
   # - selenium
   - solr
-  - upload-progress
-  # - varnish
+  # - upload-progress
+  - varnish
   - xdebug
-  - xhprof
+  # - xhprof
 
 # Add any extra apt or yum packages you would like installed.
 extra_packages:
