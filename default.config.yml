@@ -107,10 +107,10 @@ apache_vhost_php_fpm_parameters: |
 # multisite deployments, you can point multiple servernames at one documentroot.
 # View the geerlingguy.apache Ansible Role README for more options.
 apache_vhosts:
-  - servername: "{{ drupal_domain }}"
-    serveralias: "www.{{ drupal_domain }}"
-    documentroot: "{{ drupal_core_path }}"
-    extra_parameters: "{{ apache_vhost_php_fpm_parameters }}"
+  #  - servername: "{{ drupal_domain }}"
+  #    serveralias: "www.{{ drupal_domain }}"
+  #    documentroot: "{{ drupal_core_path }}"
+  #    extra_parameters: "{{ apache_vhost_php_fpm_parameters }}"
 
   - servername: "adminer.{{ vagrant_hostname }}"
     documentroot: "{{ adminer_install_dir }}"
