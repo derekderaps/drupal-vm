@@ -24,8 +24,9 @@ sites:
     - accelerate
     - ctsi
   /docroot:
-    - poets
     - ucsf
+  /public:
+    - poets
 
 # List multisites / sub-domains.
 # @TODO break multisites and just extra sub-domains into separate variables so
