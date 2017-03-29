@@ -18,6 +18,7 @@ sites:
     - trulymad
     - usfi
   /web:
+    - k3n
     - kalablog8
     - progmi
   /www:
