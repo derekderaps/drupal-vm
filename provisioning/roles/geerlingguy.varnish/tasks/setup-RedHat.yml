@@ -8,7 +8,7 @@
 
 - name: Add Varnish repository.
   yum:
-    name: https://repo.varnish-cache.org/redhat/varnish-{{ varnish_version }}.el6.rpm
+    name: "https://repo.varnish-cache.org/redhat/varnish-{{ varnish_version }}.el6.rpm"
     state: present
   when: ansible_distribution_major_version|int < 7
 
