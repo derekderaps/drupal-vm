@@ -41,7 +41,7 @@ drupalvm_ansible_version_min: '2.2'
 force_ansible_local: false
 
 # The web server software to use. Can be either 'apache' or 'nginx'.
-drupalvm_webserver: nginx
+drupalvm_webserver: apache
 
 # The database system to use. Can be either 'mysql' or 'pgsql'.
 drupalvm_database: mysql
