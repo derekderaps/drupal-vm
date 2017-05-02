@@ -191,7 +191,7 @@ postgresql_users:
 # to install *any* extras, set this value to an empty set, e.g. `[]`.
 installed_extras:
   - adminer
-  # - blackfire
+  - blackfire
   - drupalconsole
   - drush
   # - elasticsearch
@@ -205,10 +205,10 @@ installed_extras:
   # - ruby
   # - selenium
   - solr
-  # - upload-progress
+  - upload-progress
   - varnish
   - xdebug
-  # - xhprof
+  - xhprof
 
 # Add any extra apt or yum packages you would like installed.
 extra_packages:
