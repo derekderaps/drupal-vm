@@ -14,6 +14,11 @@ guest_config_dir = ENV['DRUPALVM_CONFIG_DIR'] ? "/vagrant/#{ENV['DRUPALVM_CONFIG
 
 drupalvm_env = ENV['DRUPALVM_ENV'] || 'vagrant'
 
+# A check to see if the object is iterable
+def iterable?(object)
+  object.respond_to? :each
+end
+
 # Cross-platform way of finding an executable in the $PATH.
 def which(cmd)
   exts = ENV['PATHEXT'] ? ENV['PATHEXT'].split(';') : ['']
@@ -70,7 +75,7 @@ vconfig['sites'].each do |webroot, sites|
     # multisites.
     hosts     = [ site ]
     databases = [ site ]
-    if vconfig['multisites'].key?(site)
+    if vconfig['multisites'] and iterable?(vconfig['multisites']) and vconfig['multisites'].key?(site)
       vconfig['multisites'][site].each do |subsite|
         hosts     << "#{subsite}.#{site}"
         databases << "#{site}_#{subsite}"
