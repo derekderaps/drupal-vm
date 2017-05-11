@@ -11,7 +11,7 @@ installed_extras:
   - selenium
   [...]
 
-# Make sure the following four packages are in composer_global_packages:
+# Add the following package to composer_global_packages or your Drupal project:
 composer_global_packages:
   - { name: drupal/drupal-extension, release: '*' }
 ```
@@ -52,7 +52,7 @@ Using the default Drupal site as an example (it's installed in `/var/www/drupalv
               blackbox: ~
               api_driver: 'drupal'
               drupal:
-                drupal_root: '/var/www/drupalvm/drupal'
+                drupal_root: '/var/www/drupalvm/drupal/web'
               region_map:
                 content: "#content"
 
@@ -60,7 +60,7 @@ Using the default Drupal site as an example (it's installed in `/var/www/drupalv
   3. From either inside the VM or on the host machine, open up the new `features/web` folder Behat just created. Inside _that_ folder, create `HomeContent.feature` with the following contents:
 
         Feature: Test DrupalContext
-          In order to prove the Behat is working correctly in Drupal VM
+          In order to prove Behat is working correctly in Drupal VM
           As a developer
           I need to run a simple interface test
 
@@ -75,7 +75,7 @@ If everything was done correctly, you should see:
 ```console
 $ behat
 Feature: Test DrupalContext
-  In order to prove the Behat is working correctly in Drupal VM
+  In order to prove Behat is working correctly in Drupal VM
   As a developer
   I need to run a simple interface test
 

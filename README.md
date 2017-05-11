@@ -2,14 +2,14 @@
 
 [![Build Status](https://travis-ci.org/geerlingguy/drupal-vm.svg?branch=master)](https://travis-ci.org/geerlingguy/drupal-vm) [![Documentation Status](https://readthedocs.org/projects/drupal-vm/badge/?version=latest)](http://docs.drupalvm.com) [![Packagist](https://img.shields.io/packagist/v/geerlingguy/drupal-vm.svg)](https://packagist.org/packages/geerlingguy/drupal-vm)
 
-[Drupal VM](https://www.drupalvm.com/) is A VM for local Drupal development, built with Vagrant + Ansible.
+[Drupal VM](https://www.drupalvm.com/) is A VM for Drupal development, built with Vagrant + Ansible.
 
-This project aims to make spinning up a simple local Drupal test/development environment incredibly quick and easy, and to introduce new developers to the wonderful world of Drupal development on local virtual machines (instead of crufty old MAMP/WAMP-based development).
+Drupal VM makes building local Drupal development environments quick and easy, and introduces developers to the wonderful world of Drupal development on local virtual machines (instead of crufty old MAMP/WAMP-based development).
 
 It will install the following on an Ubuntu 16.04 (by default) linux VM:
 
   - Apache 2.4.x (or Nginx)
-  - PHP 7.0.x (configurable)
+  - PHP 7.1.x (configurable)
   - MySQL 5.7.x (or MariaDB, or PostgreSQL)
   - Drupal 7 or 8
   - Optional:
@@ -42,7 +42,7 @@ Full Drupal VM documentation is available at http://docs.drupalvm.com/
 
 There are a couple places where you can customize the VM for your needs:
 
-  - `config.yml`: Override any of the default VM configuration from `default.config.yml`; customize almost any aspect of any software installed in the VM (more about [overriding configurations](http://docs.drupalvm.com/en/latest/other/overriding-configurations/).
+  - `config.yml`: Override any of the default VM configuration from `default.config.yml`; customize almost any aspect of any software installed in the VM (more about [configuring Drupal VM](http://docs.drupalvm.com/en/latest/getting-started/configure-drupalvm/).
   - `drupal.composer.json` or `drupal.make.yml`: Contains configuration for the Drupal core version, modules, and patches that will be downloaded on Drupal's initial installation (you can build using Composer, Drush make, or your own codebase).
 
 If you want to switch from Drupal 8 (default) to Drupal 7 on the initial install, do the following:
@@ -91,7 +91,7 @@ Note: *If there are any errors during the course of running `vagrant up`, and it
 ### 3 - Configure your host machine to access the VM.
 
   1. [Edit your hosts file](http://www.rackspace.com/knowledge_center/article/how-do-i-modify-my-hosts-file), adding the line `192.168.88.88  drupalvm.dev` so you can connect to the VM.
-    - You can have Vagrant automatically configure your hosts file if you install the `hostsupdater` plugin (`vagrant plugin install vagrant-hostsupdater`). All hosts defined in `apache_vhosts` or `nginx_hosts` will be automatically managed. `vagrant-hostmanager` is also supported.
+    - You can have Vagrant automatically configure your hosts file if you install the `hostsupdater` plugin (`vagrant plugin install vagrant-hostsupdater`). All hosts defined in `apache_vhosts` or `nginx_vhosts` will be automatically managed. `vagrant-hostmanager` is also supported.
     - The `auto_network` plugin (`vagrant plugin install vagrant-auto_network`) can help with IP address management if you set `vagrant_ip` to `0.0.0.0` inside `config.yml`.
   2. Open your browser and access [http://drupalvm.dev/](http://drupalvm.dev/). The default login for the admin account is `admin` for both the username and password.
 
@@ -102,7 +102,7 @@ By default, this VM includes the extras listed in the `config.yml` option `insta
     installed_extras:
       - adminer
       # - blackfire
-      - drupalconsole
+      # - drupalconsole
       - drush
       # - elasticsearch
       # - java
@@ -115,6 +115,8 @@ By default, this VM includes the extras listed in the `config.yml` option `insta
       # - ruby
       # - selenium
       # - solr
+      # - tideways
+      # - upload-progress
       - varnish
       # - xdebug
       # - xhprof
@@ -152,10 +154,21 @@ Drupal VM runs on almost any modern computer that can run VirtualBox and Vagrant
   - Find out more about local development with Vagrant + VirtualBox + Ansible in this presentation: [Local Development Environments - Vagrant, VirtualBox and Ansible](http://www.slideshare.net/geerlingguy/local-development-on-virtual-machines-vagrant-virtualbox-and-ansible).
   - Learn about how Ansible can accelerate your ability to innovate and manage your infrastructure by reading [Ansible for DevOps](http://www.ansiblefordevops.com/).
 
+## Tests
+
+To run basic integration tests using Docker:
+
+  1. [Install Docker](https://docs.docker.com/engine/installation/).
+  2. In this project directory, run: `composer run-tests`
+
+> Note: If you're on a Mac, you need to use [Docker's Edge release](https://docs.docker.com/docker-for-mac/install/#download-docker-for-mac), at least until [this issue](https://github.com/docker/for-mac/issues/77) is resolved.
+
+The project's automated tests are run via Travis CI, and the more comprehensive test suite covers multiple Linux distributions and many different Drupal VM use cases and deployment techniques.
+
 ## License
 
 This project is licensed under the MIT open source license.
 
 ## About the Author
 
-[Jeff Geerling](http://www.jeffgeerling.com/) created Drupal VM in 2014 for a more efficient Drupal site and core/contrib development workflow. This project is featured as an example in [Ansible for DevOps](http://www.ansiblefordevops.com/).
+[Jeff Geerling](https://www.jeffgeerling.com/) created Drupal VM in 2014 for a more efficient Drupal site and core/contrib development workflow. This project is featured as an example in [Ansible for DevOps](https://www.ansiblefordevops.com/).
