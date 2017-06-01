@@ -63,7 +63,9 @@ stdin: is not a tty
 mount.nfs: Connection timed out
 ```
 
-If you get this message, then it's likely that either NFS isn't running correctly on your host, certain ports are protocols are being blocked by the system firewall, or you need to add additional mount options to your `vagrant_synced_folders` configuration. Try the following fixes:
+If the directory you are trying to mount is within an encrypted folder or volume, NFS will very often fail with the above message as well as `exportfs: /home/myusername/Sites/drupalvm does not support NFS export`. There is no workaround other than sharing a directory that is not encrypted.
+
+If encryption is not the issue then it's likely that either NFS isn't running correctly on your host, certain ports or protocols are being blocked by the system firewall, or you need to add additional mount options to your `vagrant_synced_folders` configuration. Try the following fixes:
 
   1. On Ubuntu, if you get a message like `It appears your machine doesn't support NFS`, run `sudo apt-get install -y nfs-server`.
   2. Install the `vagrant-vbguest` plugin, which will make sure you are running the latest version of the VirualBox Guest Additions inside the VM (this can solve many different problems!).
@@ -71,6 +73,30 @@ If you get this message, then it's likely that either NFS isn't running correctl
   4. Add `mount_options: ['vers=3']` to your synced folder definition in config.yml after the other options like `local_path`, `destination`, and `type`.
 
 After attempting any of the above fixes, run `vagrant reload --provision` to restart the VM and attempt mounting the synced folder again, or `vagrant destroy -f && vagrant up` to rebuild the VM from scratch.
+
+### NFS shares are slow or hang due to UDP protocol
+
+If the default transport protocol UDP is causing slowness or failures to mount NFS shared folders, you can switch to NFSv4 and TCP by configuring your `vagrant_synced_folders` like the example below:
+
+```
+vagrant_synced_folders:
+  # The default share.
+  - local_path: .
+    destination: /var/www/drupalvm
+    type: nfs
+    create: true
+    options_override:
+      nfs_version: 4
+      nfs_udp: false
+
+  # Manually specify the /vagrant share to override the defaults
+  - local_path: .
+    destination: /vagrant
+    type: nfs
+    options_override:
+      nfs_version: 4
+      nfs_udp: false
+```
 
 ## Intel VT-x virtualization support
 
