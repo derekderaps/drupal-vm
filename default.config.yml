@@ -220,10 +220,11 @@ extra_packages:
   - sqlite
 
 # You can configure almost anything else on the server in the rest of this file.
-extra_security_enabled: false
-
 drush_version: "8.1.10"
 
+extra_security_enabled: false
+
+firewall_enabled: true
 firewall_allowed_tcp_ports:
   - "22"
   - "25"
@@ -310,6 +311,7 @@ php_xdebug_remote_connect_back: 1
 # Use PHPSTORM for PHPStorm, sublime.xdebug for Sublime Text.
 php_xdebug_idekey: PHPSTORM
 php_xdebug_max_nesting_level: 256
+php_xdebug_remote_host: "{{ ansible_default_ipv4.gateway }}"
 
 # Solr Configuration (if enabled above).
 solr_version: "5.5.3"
@@ -327,5 +329,6 @@ docker_image_path: ~/Downloads
 # Other configuration.
 dashboard_install_dir: /var/www/dashboard
 known_hosts_path: ~/.ssh/known_hosts
+hostname_configure: true
 hostname_fqdn: "{{ vagrant_hostname }}"
 ssh_home: "{{ drupal_core_path }}"
