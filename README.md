@@ -1,7 +1,6 @@
-# A fork of [Drupal VM](http://www.drupalvm.com/) with some pre-configured sites
+# A fork of [Drupal VM](http://www.drupalvm.com/) with some pre-configured sites.
 
-**[Visit the repo wiki to get
-started.](https://github.com/kalamuna/drupal-vm/wiki)**
+**Visit the [repo wiki](https://github.com/kalamuna/drupal-vm/wiki) to get started.**
 
 _Upstream Drupal VM README continues below..._
 
