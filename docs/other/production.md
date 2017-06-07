@@ -1,4 +1,6 @@
-Drupal VM has _experimental_ support for deploying Drupal VM to a production environment. The security of your servers is _your_ responsibility.
+Drupal VM supports deploying Drupal VM to a production environment. The security of your servers is _your_ responsibility.
+
+(See companion blog post to this documentation: [Soup to Nuts: Using Drupal VM to build local and prod](https://www.jeffgeerling.com/blog/2017/soup-nuts-using-drupal-vm-build-local-and-prod).)
 
 ## Production specific overrides.
 
@@ -16,22 +18,42 @@ If you're issuing a provision directly through `ansible-playbook` as you would d
 
 ```sh
 # By default it doesn't try to load any other config file.
-ansible-playbook -i examples/prod/inventory provisioning/playbook.yml --sudo --ask-sudo-pass
+ansible-playbook -i examples/prod/inventory provisioning/playbook.yml --become --ask-become-pass
 
 # Loads prod.config.yml if available.
-DRUPALVM_ENV=prod ansible-playbook -i examples/prod/inventory provisioning/playbook.yml --sudo --ask-sudo-pass
+DRUPALVM_ENV=prod ansible-playbook -i examples/prod/inventory provisioning/playbook.yml --become --ask-become-pass
 ```
 
 If you add `DRUPALVM_ENV=prod` to the `/etc/environment` file on your production environment:
 
 ```sh
 # Loads prod.config.yml if available.
-ansible-playbook -i examples/prod/inventory provisioning/playbook.yml --sudo --ask-sudo-pass
+ansible-playbook -i examples/prod/inventory provisioning/playbook.yml --become --ask-become-pass
 ```
 
 _Note: Having the variable set locally takes precedence over having it on the remote machine._
 
 As a precaution not to accidentally provision a production server with insecure configurations, you should set your security hardening configurations in `config.yml`, your local development overrides in `vagrant.config.yml` and finally any additional production specific overrides in `prod.config.yml`. This way, a production environment will never be provisioned with development tools, even if the `prod.config.yml` is not read.
+
+## Ansible Vault support
+
+Drupal VM will include a `secrets.yml` file included in your VM's configuration directory (alongside `config.yml`, `local.config.yml`, etc.) that you can use to store sensitive variables (e.g. MySQL's root password, Drupal's admin password). For extra security, you can encrypt this file, and require a password whenever the variable is used.
+
+First, you'd create an Ansible Vault encrypted file:
+
+    $ ansible-vault create secrets.yml
+
+Create the file inside your VM's configuration directory, add any plaintext passwords, and save it. Ansible Vault will encrypt the file, and you can edit the file using `ansible-vault edit`.
+
+When running `vagrant` commands, make sure you tell the Ansible provisioner to use `--ask-vault-pass`, e.g.:
+
+    DRUPALVM_ANSIBLE_ARGS='--ask-vault-pass' vagrant [command]
+
+And if you need to override one of the secrets stored in that file, you can do so through an environment-specific config file, for example:
+
+    vagrant.config.yml
+    prod.config.yml
+    [etc.]
 
 ## Example: Drupal VM on DigitalOcean
 
@@ -103,11 +125,11 @@ Once the initialization is complete, you can test your new admin login with `ssh
 
 Run the following command within Drupal VM's root directory (the folder containing the `Vagrantfile`):
 
-    ansible-playbook -i examples/prod/inventory provisioning/playbook.yml --sudo --ask-sudo-pass
+    DRUPALVM_ENV=prod ansible-playbook -i examples/prod/inventory provisioning/playbook.yml --become --ask-become-pass
 
 _Note: If you have installed [Drupal VM as a Composer dependency](../deployment/composer-dependency.md) you also need to specify the path of the config directory where you have your `config.yml` located._
 
-    ansible-playbook -i config/prod/inventory vendor/geerlingguy/drupal-vm/provisioning/playbook.yml -e "config_dir=$(pwd)/config" --sudo --ask-sudo-pass
+    DRUPALVM_ENV=prod ansible-playbook -i config/prod/inventory vendor/geerlingguy/drupal-vm/provisioning/playbook.yml -e "config_dir=$(pwd)/config" --become --ask-become-pass
 
 Ansible will prompt you for your admin account's `sudo` password (the same as the password you encrypted and saved as `admin_password`). Enter it and press return.
 
@@ -123,11 +145,11 @@ After a few minutes, your Drupal-VM-in-the-cloud Droplet should be fully configu
       $ sudo chmod -R 0700 /var/www/drupalvm/drupal/sites/default/files
       ```
 
-  - You can't synchronize folders between your host machine and DigitalOcean (at least not in any sane way); so you'll need to either have Drupal VM install a site from a given Drush make file or composer.json, or deploy your site yourself.
+  - You can't synchronize folders between your host machine and DigitalOcean (at least not in any sane way); so you'll need to either have Drupal VM install a site from a given Drush make file or composer.json, or deploy the site via Git, using the `geerlingguy.drupal` role's git deployment options.
   - Drupal VM doesn't include any kind of backup system. You should use one if you have any kind of important data on your server!
 
 ### Go Further
 
-You can use Ubuntu 12.04, Ubuntu 14.04, Ubuntu 16.04, CentOS 6 or CentOS 7 when you build the DigitalOcean Droplet. Just like with Drupal VM running locally, you can customize almost every aspect of the server!
+You can use Ubuntu 14.04, Ubuntu 16.04, Debian 8, CentOS 6 or CentOS 7 when you build the DigitalOcean Droplet. Just like with Drupal VM running locally, you can customize almost every aspect of the server!
 
 You may want to customize your configuration even further, to make sure Drupal VM is tuned for your specific Drupal site's needs, or you may want to change things and make the server configuration more flexible, etc. For all that, the book [Ansible for DevOps](http://ansiblefordevops.com/) will give you a great introduction to using Ansible to make Drupal VM and the included Ansible configuration do exactly what you need!
