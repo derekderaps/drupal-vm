@@ -26,13 +26,11 @@ One scenario where this might be useful is when you are moving generated code fr
 
 ```yaml
 options_override:
-  # Disable the default recursive chown so that the files/ folder won't be affected
-  rsync__chown: false
+  owner: vagrant
+  group: www-data
   rsync__args: [
     "--verbose", "--archive", "--delete",
     "--chmod=gu=rwX,o=rX", # 664 for files, 775 for directories
-    "--owner", "--group", # required for the following command
-    "--usermap=*:vagrant", "--groupmap=*:www-data"
   ]
 ```
 
@@ -57,12 +55,6 @@ vagrant_synced_folders:
 
 See [this issue](https://github.com/geerlingguy/drupal-vm/issues/67) for more information.
 
-### VirtualBox Guest Additions out of date
-
-If you get errors when running `vagrant up` stating that your guest additions are out of date, you can fix this easily by installing the `vagrant-vbguest` plugin. Run the following command in the drupal-vm folder: `vagrant plugin install vagrant-vbguest`.
-
-Otherwise, you will need to make sure you're using the officially supported `geerlingguy/ubuntu1404` box, which should _generally_ have the latest (or near-latest) guest additions installed. If not, please open an issue in the upstream project for building the base box: [`packer-ubuntu-1404`](https://github.com/geerlingguy/packer-ubuntu-1404).
-
 ### Permissions-related errors
 
 If you're encountering errors where Drupal or some other software inside the VM is having permissions issues creating or deleting files inside a synced folder, you might need to either make sure the file permissions are correct on your host machine (if a folder is not readable by you, it probably also won't be readable when mounted via NFS!), or add extra configuration to the synced folders item (if using a sync method like `rsync`):
@@ -71,9 +63,9 @@ If you're encountering errors where Drupal or some other software inside the VM 
 vagrant_synced_folders:
   - local_path: .
     destination: /var/www/drupalvm
-    type: nfs
+    type: ""
     create: true
-    mount_options: ["dmode=775,fmode=664"]
+    mount_options: ["dmode=775", "fmode=664"]
     options_override:
       owner: "vagrant"
       group: "www-data"

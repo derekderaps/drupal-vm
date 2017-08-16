@@ -1,5 +1,276 @@
 # Drupal VM Changelog
 
+## 4.6.0 "TODO" (2017-06-28)
+
+### Breaking Changes
+
+  * If you have `varnish` in your `installed_extras`, then the newest version of the Varnish role included in this release changes the Varnish package repository (on all OSes) to use the latest supported Varnish packages from Varnish's official packagecloud.io repos. This allows you to specify Varnish versions anywhere from the latest (currently 5.1) to early 2.x versions (and everything in-between)... but you might either have to uninstall Varnish before updating existing VMs, or just rebuild your VM to take advantage of the latest role version.
+
+### New/changed variables in default.config.yml
+
+  * `vagrant_box` still defaults to Ubuntu 16.04, but you can now use Debian 9 ('Stretch') if you set the variable to `geerlingguy/debian9`.
+  * `vagrant_plugins` was added (see #1378), and contains a list of Vagrant plugins that—if not already installed—will be installed for use by Vagrant.
+
+### Improvements
+
+  * #1455: Update Varnish role to allow for Varnish 5.1, 5.0, and any older version.
+  * #1451: Document the availability of `geerlingguy/debian9` base box (and Docker base container).
+  * #1378: Automatically install a configurable list of Vagrant plugins (`hostsupdater` and `vbguest` by default).
+  * #1423: Add documentation on using the official Docker image for quick Drupal testing environments.
+  * #1388, #1389: Use `geerlingguy/drupal-vm` docker image by default in Docker Compose file.
+  * #1437: Allow list of paths in `pre_provision_tasks_dir` and `post_provision_tasks_dir` (used to just be one path maximum).
+  * #1443: Add IRC badge linking to `#drupal-vm` freenode IRC room on Riot.
+  * #1171: Support using XDebug to debug Drush commands inside Drupal VM.
+  * #1368: Ensure private filesystem works correctly when using Nginx.
+  * #1375: Allow /vagrant default synced folder to be managed like other synced folders.
+  * #1406: Minor doc improvement for using Tideways instead of XHprof when using PHP 7+.
+  * #1431: Minor doc improvement for `composer docker-bake` command.
+  * #1386: Remove dated Acquia example and point to BLT's configuration instead.
+  * #1418: Allow PHP configuration to be overridden so default system packages can be used instead of Ondrej Sury's repo (allowing PHP 5.3, 5.4, and 5.5 to be used when absolutely necessary).
+  * #1424: Add support for RFC 5785 (`.well-known`) when using Nginx.
+  * #1451: Use 192.168.89.89 for default Docker Drupal VM IP.
+  * Updated roles: PostgreSQL, PHP Versions, Redis, Nginx, Varnish.
+
+### Bugfixes
+
+  * #1403: Ensure PostgreSQL works correctly on all supported OSes.
+  * #1399: Fix bug where Drupal would reinstall on reprovision if not using English as the default language.
+  * #1384, #1420: Update docs in Solr example for more clarity concerning use with Drupal 8.
+  * #1444: Fix outdated comment for `drupal_install_site` variable.
+  * #1411: Fix `.gitignore` file applying rules to files in subdirectories.
+
+
+## 4.5.0 "Break In (For Strings, Flutes, and Celesta)" (2017-05-24)
+
+### Breaking Changes
+
+  * The default `nodejs_version` is now set to `6.x`; if you need to stay on `0.12` or some other version, be sure to set the version explicitly in your own `config.yml`.
+
+### New/changed variables in default.config.yml
+
+  * Changed variables:
+    * `nodejs_version: "6.x"` (was `0.12`)
+  * New variables:
+    * Reconfigurable templates for Drush Aliases:
+      * `drush_aliases_host_template: "templates/drupalvm.aliases.drushrc.php.j2"`
+      * `drush_aliases_guest_template: "templates/drupalvm-local.aliases.drushrc.php.j2"`
+    * Reconfigurable template for Nginx hosts:
+      * `nginx_vhost_template: "templates/nginx-vhost.conf.j2"`
+    * `firewall_enabled: true` (allows the disabling of Drupal VM's default firewall, e.g. for Docker usage)
+    * `php_xdebug_remote_host: "{{ ansible_default_ipv4.gateway }}"` (prevents warnings when using Xdebug)
+    * New Docker configuration options:
+      * `docker_container_name: drupal-vm`
+      * `docker_image_name: drupal-vm`
+      * `docker_image_path: ~/Downloads`
+    * New hostname configuration options:
+      * `hostname_configure: true`
+      * `hostname_fqdn: "{{ vagrant_hostname }}"`
+
+### Improvements
+
+  * #1206: Add instructions for running Drupal VM inside Docker.
+  * #1356: Add an official geerlingguy/drupal-vm image on Docker Hub.
+  * #1366: Make Drupal VM Docker image easier to use for single-site installations.
+  * #1377: Extract php-versions (version switching tasks) into standalone role so anyone can use it.
+  * #1353: Update default Node.js version to 6.x.
+  * #1327: Refactor task includes into drupalvm Ansible roles.
+  * #1329: Update Nginx role, allowing use of extensible Nginx templates.
+  * #1254: Refactor Drupal VM's Nginx templates to allow for extensibility.
+  * #1349: Make it easier to install Node.js global packages by name.
+  * #1258: Finalize documentation for Git-based deployment.
+  * Updated roles: Firewall, Nginx, Node.js, Apache, Selenium.
+
+### Bugfixes
+
+  * #1351: Fix documentation bug concerning paths in example.drupal.composer.json.
+  * #1304: Fix documentation bug concerning Behat paths.
+  * #1350: Set the `php_xdebug_remote_host` to prevent Xdebug warnings.
+  * #1347: Fix LoadError message on vagrant up/down.
+
+
+## 4.4.5 (2017-04-24)
+
+### New/changed variables in default.config.yml
+
+  * `drupalconsole` is no longer enabled globally by default (see #1335 and #1338).
+
+### Improvements
+
+  * #1333: Add docs on using Drupal VM with Wordpress and other PHP apps.
+
+### Bugfixes
+
+  * #1335: Update Drupal Console Role so it works correctly with rc17 and beyond.
+  * #1338: Remove drupalconsole from default installed_extras list.
+
+
+## 4.4.4 (2017-04-22)
+
+### New/changed variables in default.config.yml
+
+  * N/A
+
+### Improvements
+
+  * #1271: Don't run PHP role for 'drupal' tag.
+  * Updated Ansible roles: `postgresql`, `drupal`.
+  * #1323: Default synced folder type to `vagrant_synced_folder_default_type` if unset.
+
+### Bugfixes
+
+  * #1324: Only depend on `geerlingguy.nginx` when `drupalvm_webserver` is `nginx`.
+
+
+## 4.4.3 (2017-04-20)
+
+### New/changed variables in default.config.yml
+
+  * Added `ssh_home: "{{ drupal_core_path }}"` so `vagrant ssh` drops you directly into the core path by default.
+
+### Improvements
+
+  * Updated Ansible roles: `mysql`, `solr`, `nodejs`, `drupal`, `varnish`.
+  * #1177: Mention the availability of the `geerlingguy/debian8` base box.
+  * #1265: Document reverse-mount shares. Also scaffolds Issue #1258.
+  * #1272: Set ssh_home by default since it's really helpful.
+  * #1259: Update some performance-related docs.
+  * #1317: Remove duplicate handler and extract www tasks into new role.
+
+### Bugfixes
+
+  * #1294: Fix 'Cannot load Zend OPcache' notice.
+  * #1306: Fix Ansible 2.3-related bug with jinja2 inside when statement.
+  * #1302: Remove `ansible_ssh_user` variable to avoid upstream bugs.
+  * #1314: Revert "Move simple `include_vars` statement to `vars_files`"
+
+
+## 4.4.2 (2017-04-12)
+
+### New/changed variables in default.config.yml
+
+  * N/A
+
+### Improvements
+
+  * Updated Ansible roles: `firewall`, `mailhog`, `apache`, `git`, `mysql`, `solr`, `adminer`, and `varnish`.
+  * #1289: Update Linux host docs to mention encryption as primary reason for NFS issues.
+
+### Bugfixes
+
+  * #1280: Documentation bugfix for a Quick Start Guide link.
+  * #1275: Update Adminer role to prevent download timeouts.
+  * #1281: Avoid TypeError when a configuration file is empty.
+  * #1291: Teensy tiny docs grammar fix.
+
+
+## 4.4.1 (2017-04-01)
+
+### New/changed variables in default.config.yml
+
+  * N/A
+
+### Improvements
+
+  * Updated Ansible roles: `drupal`, `drush`, and `solr`.
+
+### Bugfixes
+
+  * #1245: Follow-up to make sure VM initial provisioning works as expected.
+  * #1261: Run hostname.yml tasks for `drupal` tag to prevent errors.
+  * Fixed pareview.sh script configuration example.
+  * Tweaked docs for Selenium and Production for clarity.
+
+
+## 4.4.0 "Sea of Simulation" (2017-03-24)
+
+### Breaking Changes
+
+  * No breaking changes.
+
+### New/changed variables in default.config.yml
+
+  * `php_version` now defaults to `"7.1"` (was `"7.0"`).
+
+### Improvements
+
+  * #1252: Allow Drupal to be deployed into Drupal VM from a Git repository.
+  * #1177: Add full and CI-tested support for Debian 8.
+  * #1213: Add `DRUPALVM_ANSIBLE_TAGS` environment variable to specify tags to run.
+  * #1031: Switch default PHP version to `7.1`.
+  * #1211: Add mcrypt PHP extension on RedHat-based installs.
+  * #1215: Document alternative method of running Drupal Console commands.
+  * Removed logic supporting PHP 5.5, as it's no longer supported.
+  * #1233: Tidy up the main Drupal VM playbook.
+  * #1198: Use VAGRANT_HOME to get the SSH `insecure_private_key` directory for Drush.
+  * #1238: Add a configurable intro message for `vagrant up` and `vagrant reload`.
+  * #1230: Allow `Vagrantfile.local` to be either in project _or_ config directory.
+  * #1244: Add support for a `secrets.yml` file for use with Ansible Vault.
+  * #1135: Improve Sublime Text XDebug documentation.
+  * Updated roles: Drush, Drupal, Firewall, Varnish.
+
+### Bugfixes
+
+  * #1199: Make sure `rsync` synced folders' `owner` and `group` are applied correctly.
+  * #1212: Fixes Drush make builds after Drush role installation technique changed.
+  * #1237: Raise a `VagrantError` for clearer error messaging.
+  * #1220: Ensure `www-data` is in the group of the NFS synced directory (file permissions).
+  * #1245: Ensure production `init.yml` playbook works on Ubuntu 16.04.
+  * #1250: Document use of `DRUPALVM_ENV` variable in production docs.
+  * #1253: Ensure `geerlingguy.php` role is run when `drupal` tag is used.
+
+
+## 4.3.1 (2017-03-14)
+
+### New/changed variables in default.config.yml
+
+  * Removed now-unneccessary `drush_keep_updated` and `drush_composer_cli_options` vars.
+  * Default to Drush version `8.1.10` (since we use the Phar-based install by default now).
+
+### Improvements
+
+  * #1197: Add PAReview.sh script setup to Drupal VM.
+  * #1213: Add task-specific tags for supercharged reprovisioning.
+  * #1212: Update Drush role and shave a minute or so off every build, ever!
+  * #1215: Add docs on using Drupal Console with `vagrant exec`.
+  * Update roles with bugfixes and improvements: Drush, Drupal.
+
+### Bugfixes
+
+  * #1211: Add mcrypt PHP extension on RedHat-based installs.
+
+
+## 4.3.0 "Ring Game and Escape" (2017-03-09)
+
+### Breaking Changes
+
+  * No _explicit_ breaking changes; however, you should update any of the changed variables in the 'Updated Drupal-specific variable names' section below.
+
+### New/changed variables in default.config.yml
+
+  * `vagrant_gui: false` added (allows UI to appear after running `vagrant up` - Issue #1175).
+  * Updated Drupal-specific variable names (Issue #1192):
+    * `drupalvm_database` changed to `drupal_db_backend`
+    * `build_makefile` changed to `drupal_build_makefile`
+    * `build_composer` changed to `drupal_build_composer`
+    * `build_composer_project` changed to `drupal_build_composer_project`
+    * `install_site` changed to `drupal_install_site`
+  * `drupal_core_owner` added (defaults to `drupalvm_user` - Issue #1192)
+  * `tideways` added (commented out) to `installed_extras` (Issue #1181)
+
+### Improvements
+
+  * #1192: Move Drupal build and install code into revamped `geerlingguy.drupal` role.
+  * #1175: Add `vagrant_gui` option to allow GUI to show when running `vagrant up`.
+  * #1200: Only install necessary development packages (for faster, lighter builds).
+  * Roles updated to latest version: Composer, Solr, Java, Selenium, Drush, Firewall, and Varnish.
+
+### Bugfixes
+
+  * #1167, #1181, #1168, #1188: Documentation tweaks.
+  * #420: Update Drush role so 'run drush to set it up' doesn't fail.
+  * #1182: Clean up Tideways documentation.
+
+
 ## 4.2.1 (2017-02-08)
 
 ### Improvements

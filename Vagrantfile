@@ -1,6 +1,7 @@
 # -*- mode: ruby -*-
 # vi: set ft=ruby :
-VAGRANTFILE_API_VERSION = '2' unless defined? VAGRANTFILE_API_VERSION
+
+require_relative 'lib/drupalvm/vagrant'
 
 # Absolute paths on the host machine.
 host_drupalvm_dir = File.dirname(File.expand_path(__FILE__))
@@ -14,53 +15,46 @@ guest_config_dir = ENV['DRUPALVM_CONFIG_DIR'] ? "/vagrant/#{ENV['DRUPALVM_CONFIG
 
 drupalvm_env = ENV['DRUPALVM_ENV'] || 'vagrant'
 
-# Cross-platform way of finding an executable in the $PATH.
-def which(cmd)
-  exts = ENV['PATHEXT'] ? ENV['PATHEXT'].split(';') : ['']
-  ENV['PATH'].split(File::PATH_SEPARATOR).each do |path|
-    exts.each do |ext|
-      exe = File.join(path, "#{cmd}#{ext}")
-      return exe if File.executable?(exe) && !File.directory?(exe)
-    end
-  end
-  nil
+default_config_file = "#{host_drupalvm_dir}/default.config.yml"
+unless File.exist?(default_config_file)
+  raise_message "Configuration file not found! Expected in #{default_config_file}"
 end
 
-def get_ansible_version(exe)
-  /^[^\s]+ (.+)$/.match(`#{exe} --version`) { |match| return match[1] }
-end
+################################################################################
+# BEGIN Kalamuna custom code ###################################################
+################################################################################
 
-def walk(obj, &fn)
-  if obj.is_a?(Array)
-    obj.map { |value| walk(value, &fn) }
-  elsif obj.is_a?(Hash)
-    obj.each_pair { |key, value| obj[key] = walk(value, &fn) }
-  else
-    obj = yield(obj)
-  end
-end
-
+# Load the config files manually because Drupal VM's load_config() function
+# replaces Jinja variables, some of which are only available in the Ansible
+# context.
 require 'yaml'
-# Load default VM configurations.
-vconfig = YAML.load_file("#{host_drupalvm_dir}/default.config.yml")
-# Use optional config.yml and local.config.yml for configuration overrides.
+kalaconfig = YAML.load_file("#{host_drupalvm_dir}/default.config.yml")
 ['config.yml', 'local.config.yml', "#{drupalvm_env}.config.yml"].each do |config_file|
   if File.exist?("#{host_config_dir}/#{config_file}")
-    vconfig.merge!(YAML.load_file("#{host_config_dir}/#{config_file}"))
+    optional_config = YAML.load_file("#{host_config_dir}/#{config_file}")
+    kalaconfig.merge!(optional_config) if optional_config
   end
 end
 
 # Programmatically add synced folder, database, and virtualhost for each site.
-vconfig['sites'].each do |webroot, sites|
+kalaconfig['sites'].each do |webroot, sites|
   sites.each do |site|
+
+    # Formulate the path of the site's repo root on the host.
+    local_path = File.expand_path(kalaconfig['sites_path']) + '/' + site
+
+    # Don't generate config for sites that are not present.
+    unless Dir.exist?(local_path)
+      next
+    end
 
     # Formulate the path of the site's webroot in the VM, for use below.
     guest_path = "/var/www/#{site}"
 
     # Append a synced folder for this site to the config's list of existing
     # synced folders.
-    vconfig['vagrant_synced_folders'] << {
-      'local_path'  => vconfig['sites_path'] + '/' + site,
+    kalaconfig['vagrant_synced_folders'] << {
+      'local_path'  => local_path,
       'destination' => guest_path,
       'type'        => 'nfs',
       'create'      => 'true',
@@ -70,8 +64,8 @@ vconfig['sites'].each do |webroot, sites|
     # multisites.
     hosts     = [ site ]
     databases = [ site ]
-    if vconfig['multisites'].key?(site)
-      vconfig['multisites'][site].each do |subsite|
+    if kalaconfig['multisites'].key?(site)
+      kalaconfig['multisites'][site].each do |subsite|
         hosts     << "#{subsite}.#{site}"
         databases << "#{site}_#{subsite}"
       end
@@ -79,15 +73,15 @@ vconfig['sites'].each do |webroot, sites|
 
     # Add an apache/nginx virtualhost entry for each site/subsite.
     hosts.each do |host|
-      case vconfig['drupalvm_webserver']
+      case kalaconfig['drupalvm_webserver']
       when 'apache'
-        vconfig['apache_vhosts'] << {
+        kalaconfig['apache_vhosts'] << {
           'servername'       => "#{host}.{{ vagrant_hostname }}",
           'documentroot'     => guest_path + webroot,
           'extra_parameters' => "{{ apache_vhost_php_fpm_parameters }}"
         }
       when 'nginx'
-        vconfig['nginx_hosts'] << {
+        kalaconfig['nginx_hosts'] << {
           'server_name' => "#{host}.{{ vagrant_hostname }}",
           'root'        => guest_path + webroot,
           'is_php'      => 'true',
@@ -99,7 +93,7 @@ vconfig['sites'].each do |webroot, sites|
 
     # Add a database for each site/subsite.
     databases.each do |database|
-      vconfig['mysql_databases'] << {
+      kalaconfig['mysql_databases'] << {
         'name'      => "#{database}_drupalvm",
         'encoding'  => 'utf8mb4',
         'collation' => 'utf8mb4_general_ci',
@@ -118,43 +112,56 @@ sites_config_keys = [
 
 # Create a subset of the config hash that only contains those variables we have
 # changed.
-sites_config = vconfig.select { |key|
+sites_config = kalaconfig.select { |key|
   sites_config_keys.include? key
 }
 
-# Output our config overrides to `sites.config.yml` so that Ansible will know
-# about them in the provisioning step.
-File.open('sites.config.yml', 'w') do |file|
+# Dump our config overrides to a config file so that Ansible will know about
+# them in the provisioning step.
+File.open('config.yml', 'w') do |file|
+  file << "# This file is automatically generated by Kalamuna's fork of Drupal VM. Please do not modify it; any modifications will be overwritten during the next Vagrant operation.\n"
   file << sites_config.to_yaml
 end
 
-# Replace jinja variables in config.
-vconfig = walk(vconfig) do |value|
-  while value.is_a?(String) && value.match(/{{ .* }}/)
-    value = value.gsub(/{{ (.*?) }}/) { vconfig[Regexp.last_match(1)] }
-  end
-  value
+################################################################################
+# END Kalamuna custom code #####################################################
+################################################################################
+
+vconfig = load_config([
+  default_config_file,
+  "#{host_config_dir}/config.yml",
+  "#{host_config_dir}/local.config.yml",
+  "#{host_config_dir}/#{drupalvm_env}.config.yml"
+])
+
+provisioner = vconfig['force_ansible_local'] ? :ansible_local : vagrant_provisioner
+if provisioner == :ansible
+  playbook = "#{host_drupalvm_dir}/provisioning/playbook.yml"
+  config_dir = host_config_dir
+else
+  playbook = "#{guest_drupalvm_dir}/provisioning/playbook.yml"
+  config_dir = guest_config_dir
 end
 
+# Verify version requirements.
+require_ansible_version ">= #{vconfig['drupalvm_ansible_version_min']}"
 Vagrant.require_version ">= #{vconfig['drupalvm_vagrant_version_min']}"
 
-ansible_bin = which('ansible-playbook')
-ansible_version = Gem::Version.new(get_ansible_version(ansible_bin)) if ansible_bin
-ansible_version_min = Gem::Version.new(vconfig['drupalvm_ansible_version_min'])
+ensure_plugins(vconfig['vagrant_plugins'])
 
-Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
+Vagrant.configure('2') do |config|
+  # Set the name of the VM. See: http://stackoverflow.com/a/17864388/100134
+  config.vm.define vconfig['vagrant_machine_name']
+
   # Networking configuration.
   config.vm.hostname = vconfig['vagrant_hostname']
-  if vconfig['vagrant_ip'] == '0.0.0.0' && Vagrant.has_plugin?('vagrant-auto_network')
-    config.vm.network :private_network, ip: vconfig['vagrant_ip'], auto_network: true
-  else
-    config.vm.network :private_network, ip: vconfig['vagrant_ip']
-  end
+  config.vm.network :private_network,
+    ip: vconfig['vagrant_ip'],
+    auto_network: vconfig['vagrant_ip'] == '0.0.0.0' && Vagrant.has_plugin?('vagrant-auto_network')
 
-  if !vconfig['vagrant_public_ip'].empty? && vconfig['vagrant_public_ip'] == '0.0.0.0'
-    config.vm.network :public_network
-  elsif !vconfig['vagrant_public_ip'].empty?
-    config.vm.network :public_network, ip: vconfig['vagrant_public_ip']
+  unless vconfig['vagrant_public_ip'].empty?
+    config.vm.network :public_network,
+      ip: vconfig['vagrant_public_ip'] != '0.0.0.0' ? vconfig['vagrant_public_ip'] : nil
   end
 
   # SSH options.
@@ -164,23 +171,11 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   # Vagrant box.
   config.vm.box = vconfig['vagrant_box']
 
-  # If a hostsfile manager plugin is installed, add all server names as aliases.
-  aliases = []
-  if vconfig['drupalvm_webserver'] == 'apache'
-    vconfig['apache_vhosts'].each do |host|
-      aliases.push(host['servername'])
-      aliases.concat(host['serveralias'].split) if host['serveralias']
-    end
-  else
-    vconfig['nginx_hosts'].each do |host|
-      aliases.concat(host['server_name'].split)
-      aliases.concat(host['server_name_redirect'].split) if host['server_name_redirect']
-    end
-  end
-  aliases = aliases.uniq - [config.vm.hostname, vconfig['vagrant_ip']]
-  # Remove wildcard subdomains.
-  aliases.delete_if { |vhost| vhost.include?('*') }
+  # Display an introduction message after `vagrant up` and `vagrant provision`.
+  config.vm.post_up_message = vconfig.fetch('vagrant_post_up_message', get_default_post_up_message(vconfig))
 
+  # If a hostsfile manager plugin is installed, add all server names as aliases.
+  aliases = get_vhost_aliases(vconfig) - [config.vm.hostname]
   if Vagrant.has_plugin?('vagrant-hostsupdater')
     config.hostsupdater.aliases = aliases
   elsif Vagrant.has_plugin?('vagrant-hostmanager')
@@ -189,48 +184,38 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     config.hostmanager.aliases = aliases
   end
 
+  # Sync the project root directory to /vagrant
+  unless vconfig['vagrant_synced_folders'].any? { |synced_folder| synced_folder['destination'] == '/vagrant' }
+    vconfig['vagrant_synced_folders'].push(
+      'local_path' => host_project_dir,
+      'destination' => '/vagrant'
+    )
+  end
+
   # Synced folders.
   vconfig['vagrant_synced_folders'].each do |synced_folder|
     options = {
-      type: synced_folder['type'],
-      rsync__auto: 'true',
+      type: synced_folder.fetch('type', vconfig['vagrant_synced_folder_default_type']),
       rsync__exclude: synced_folder['excluded_paths'],
-      rsync__args: ['--verbose', '--archive', '--delete', '-z', '--chmod=ugo=rwX'],
+      rsync__args: ['--verbose', '--archive', '--delete', '-z', '--copy-links', '--chmod=ugo=rwX'],
       id: synced_folder['id'],
-      create: synced_folder.include?('create') ? synced_folder['create'] : false,
-      mount_options: synced_folder.include?('mount_options') ? synced_folder['mount_options'] : []
+      create: synced_folder.fetch('create', false),
+      mount_options: synced_folder.fetch('mount_options', [])
     }
-    if synced_folder.include?('options_override')
-      options = options.merge(synced_folder['options_override'])
+    synced_folder.fetch('options_override', {}).each do |key, value|
+      options[key.to_sym] = value
     end
-    config.vm.synced_folder synced_folder['local_path'], synced_folder['destination'], options
+    config.vm.synced_folder synced_folder.fetch('local_path'), synced_folder.fetch('destination'), options
   end
 
-  # Allow override of the default synced folder type.
-  config.vm.synced_folder host_project_dir, '/vagrant', type: vconfig.include?('vagrant_synced_folder_default_type') ? vconfig['vagrant_synced_folder_default_type'] : 'nfs'
-
-  # Provisioning. Use ansible if it's installed, ansible_local if not or if forced.
-  if ansible_bin && !vconfig['force_ansible_local']
-    if ansible_version < ansible_version_min
-      raise "You must update Ansible to at least #{ansible_version_min} to use this version of Drupal VM."
-    end
-    config.vm.provision 'ansible' do |ansible|
-      ansible.playbook = "#{host_drupalvm_dir}/provisioning/playbook.yml"
-      ansible.extra_vars = {
-        config_dir: host_config_dir,
-        drupalvm_env: drupalvm_env
-      }
-      ansible.raw_arguments = ENV['DRUPALVM_ANSIBLE_ARGS']
-    end
-  else
-    config.vm.provision 'ansible_local' do |ansible|
-      ansible.playbook = "#{guest_drupalvm_dir}/provisioning/playbook.yml"
-      ansible.extra_vars = {
-        config_dir: guest_config_dir,
-        drupalvm_env: drupalvm_env
-      }
-      ansible.raw_arguments = ENV['DRUPALVM_ANSIBLE_ARGS']
-    end
+  config.vm.provision provisioner do |ansible|
+    ansible.playbook = playbook
+    ansible.extra_vars = {
+      config_dir: config_dir,
+      drupalvm_env: drupalvm_env
+    }
+    ansible.raw_arguments = ENV['DRUPALVM_ANSIBLE_ARGS']
+    ansible.tags = ENV['DRUPALVM_ANSIBLE_TAGS']
   end
 
   # VMware Fusion.
@@ -263,9 +248,6 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     p.update_guest_tools = true
   end
 
-  # Set the name of the VM. See: http://stackoverflow.com/a/17864388/100134
-  config.vm.define vconfig['vagrant_machine_name']
-
   # Cache packages and dependencies if vagrant-cachier plugin is present.
   if Vagrant.has_plugin?('vagrant-cachier')
     config.cache.scope = :box
@@ -274,10 +256,12 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     # Cache the composer directory.
     config.cache.enable :generic, cache_dir: '/home/vagrant/.composer/cache'
     config.cache.synced_folder_opts = {
-      type: vconfig.include?('vagrant_synced_folder_default_type') ? vconfig['vagrant_synced_folder_default_type'] : 'nfs'
+      type: vconfig['vagrant_synced_folder_default_type']
     }
   end
 
   # Allow an untracked Vagrantfile to modify the configurations
-  eval File.read "#{host_config_dir}/Vagrantfile.local" if File.exist?("#{host_config_dir}/Vagrantfile.local")
+  [host_config_dir, host_project_dir].uniq.each do |dir|
+    eval File.read "#{dir}/Vagrantfile.local" if File.exist?("#{dir}/Vagrantfile.local")
+  end
 end

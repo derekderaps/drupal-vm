@@ -1,6 +1,6 @@
 ---
 varnish_package_name: "varnish"
-varnish_version: "4.1"
+varnish_version: "5.1"
 
 varnish_use_default_vcl: true
 varnish_default_vcl_template_path: default.vcl.j2
@@ -21,3 +21,19 @@ varnish_pidfile: /run/varnishd.pid
 
 varnish_enabled_services:
   - varnish
+
+# Optionally define additional backends.
+# varnish_backends:
+#   apache:
+#     host: 10.0.2.2
+#     port: 80
+#   nodejs:
+#     host: 10.0.2.3
+#     port: 80
+
+# Optionally define vhosts pointed at different backends.
+# varnish_vhosts:
+#   example.com:
+#     backend: apache
+#   nodejs.example.com:
+#     backend: nodejs

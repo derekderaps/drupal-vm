@@ -1,7 +1,14 @@
 ---
-# `vagrant_box` can also be set to geerlingguy/centos6, geerlingguy/centos7,
-# geerlingguy/ubuntu1404, geerlingguy/ubuntu1204, parallels/ubuntu-14.04, etc.
+# Available `vagrant_box` values include:
+#   - geerlingguy/centos7
+#   - geerlingguy/centos6
+#   - geerlingguy/debian9
+#   - geerlingguy/debian8
+#   - geerlingguy/ubuntu1604
+#   - geerlingguy/ubuntu1404
+#   - geerlingguy/ubuntu1204
 vagrant_box: geerlingguy/ubuntu1604
+
 vagrant_user: vagrant
 vagrant_synced_folder_default_type: nfs
 vagrant_gui: false
@@ -19,7 +26,7 @@ vagrant_public_ip: ""
 
 # A list of synced folders, with the keys 'local_path', 'destination', and
 # a 'type' of [nfs|rsync|smb] (leave empty for slow native shares). See
-# http://docs.drupalvm.com/en/latest/extras/syncing-folders/ for more info.
+# http://docs.drupalvm.com/en/latest/getting-started/syncing-folders/ for more.
 vagrant_synced_folders: []
   # The first synced folder will be used for the default Drupal installation, if
   # any of the build_* settings are 'true'. By default the folder is set to
@@ -33,6 +40,11 @@ vagrant_synced_folders: []
 vagrant_memory: 2048
 vagrant_cpus: 1
 
+# Ensure vagrant plugins are installed.
+vagrant_plugins:
+  - name: vagrant-vbguest
+  - name: vagrant-hostsupdater
+
 # Minimum required versions.
 drupalvm_vagrant_version_min: '1.8.6'
 drupalvm_ansible_version_min: '2.2'
@@ -44,17 +56,17 @@ force_ansible_local: false
 drupalvm_webserver: apache
 
 # The database system to use. Can be either 'mysql' or 'pgsql'.
-drupalvm_database: mysql
+drupal_db_backend: mysql
 
 # Set this to 'false' if you are using a different site deployment strategy and
 # would like to configure 'vagrant_synced_folders' and 'apache_vhosts' manually.
-build_makefile: false
+drupal_build_makefile: false
 drush_makefile_path: "{{ config_dir }}/drupal.make.yml"
 drush_make_options: "--no-gitinfofile"
 
 # Set 'build_makefile' to 'false' and this to 'true' if you are using a
 # composer based site deployment strategy.
-build_composer: false
+drupal_build_composer: false
 drupal_composer_path: "{{ config_dir }}/drupal.composer.json"
 drupal_composer_install_dir: "/var/www/drupalvm/drupal"
 drupal_composer_dependencies:
@@ -62,21 +74,22 @@ drupal_composer_dependencies:
 
 # Set this to 'true' and 'build_makefile', 'build_composer' to 'false' if you
 # are using Composer's create-project as a site deployment strategy.
-build_composer_project: false
+drupal_build_composer_project: false
 drupal_composer_project_package: "drupal-composer/drupal-project:8.x-dev"
 drupal_composer_project_options: "--prefer-dist --stability dev --no-interaction"
 
 # Set this to 'false' if you don't need to install drupal (using the drupal_*
 # settings below), but instead copy down a database (e.g. using drush sql-sync).
-install_site: false
+drupal_install_site: false
 
 # Required Drupal settings.
 drupal_core_path: "{{ drupal_composer_install_dir }}/web"
+drupal_core_owner: "{{ drupalvm_user }}"
 drupal_db_user: drupal
 drupal_db_password: drupal
 drupal_db_name: drupal
 
-# Settings for installing a Drupal site if 'install_site:' is 'true'.
+# Settings for installing a Drupal site if 'drupal_install_site:' is 'true'.
 drupal_major_version: 8
 drupal_domain: "{{ vagrant_hostname }}"
 drupal_site_name: "Drupal"
@@ -95,6 +108,8 @@ drupalvm_cron_jobs: []
 # Drupal VM automatically creates a drush alias file in your ~/.drush folder if
 # this variable is 'true'.
 configure_drush_aliases: true
+drush_aliases_host_template: "templates/drupalvm.aliases.drushrc.php.j2"
+drush_aliases_guest_template: "templates/drupalvm-local.aliases.drushrc.php.j2"
 
 # Helper variable to configure the PHP-FPM connection for each Apache
 # VirtualHost in the `apache_vhosts` list.
@@ -164,6 +179,7 @@ nginx_hosts:
 
 nginx_remove_default_vhost: true
 nginx_ppa_use: true
+nginx_vhost_template: "templates/nginx-vhost.conf.j2"
 
 # MySQL databases and users.
 mysql_databases: []
@@ -205,22 +221,22 @@ installed_extras:
   # - ruby
   # - selenium
   - solr
+  # - tideways
   - upload-progress
   - varnish
   - xdebug
-  - xhprof
+  # - xhprof # use `tideways` if you're installing PHP 7+
 
 # Add any extra apt or yum packages you would like installed.
 extra_packages:
   - sqlite
 
 # You can configure almost anything else on the server in the rest of this file.
+drush_version: "8.1.10"
+
 extra_security_enabled: false
 
-drush_version: "8.x"
-drush_keep_updated: true
-drush_composer_cli_options: "--prefer-dist --no-interaction"
-
+firewall_enabled: true
 firewall_allowed_tcp_ports:
   - "22"
   - "25"
@@ -279,7 +295,7 @@ mysql_wait_timeout: 300
 adminer_install_filename: index.php
 
 # Node.js configuration (if enabled above).
-# Valid examples: "0.10", "0.12", "4.x", "5.x".
+# Valid examples: "0.10", "0.12", "4.x", "5.x", "6.x".
 nodejs_version: "6.x"
 nodejs_npm_global_packages: []
 nodejs_install_npm_user: "{{ drupalvm_user }}"
@@ -308,6 +324,7 @@ php_xdebug_remote_connect_back: 1
 # Use PHPSTORM for PHPStorm, sublime.xdebug for Sublime Text.
 php_xdebug_idekey: PHPSTORM
 php_xdebug_max_nesting_level: 256
+php_xdebug_remote_host: "{{ ansible_default_ipv4.gateway }}"
 
 # Solr Configuration (if enabled above).
 solr_version: "5.5.3"
@@ -317,7 +334,69 @@ solr_xmx: "128M"
 # Selenium configuration.
 selenium_version: 2.53.0
 
+# Docker configuration.
+docker_container_name: drupal-vm
+docker_image_name: drupal-vm
+docker_image_path: ~/Downloads
+
 # Other configuration.
 dashboard_install_dir: /var/www/dashboard
 known_hosts_path: ~/.ssh/known_hosts
-#ssh_home: "{{ drupal_core_path }}"
+hostname_configure: true
+hostname_fqdn: "{{ vagrant_hostname }}"
+ssh_home: "{{ drupal_core_path }}"
+
+################################################################################
+# BEGIN Kalamuna proprietary variables #########################################
+################################################################################
+
+# Set a default sites path.
+sites_path: '~/Sites'
+
+# List sites, indexed by path to web root.
+sites:
+  /:
+    - dent
+    - eecs
+    - eight
+    - greenbiz
+    - hsa
+    - kcom
+    - msdw
+    - seven
+    - stamp
+    - trulymad
+    - usfi
+  /web:
+    - k3n
+    - kalablog8
+    - progmi
+  /www:
+    - accelerate
+    - ctsi
+  /docroot:
+    - ucsf
+  /public:
+    - poets
+  /drupal:
+    - sjwc
+
+# List multisites / sub-domains.
+# @TODO break multisites and just extra sub-domains into separate variables so
+# that we can know which need `sites.php` config (the former) and which don't
+# (the latter). The `ucsf-multisite.yml` task and `ucsf--local.sites.inc.j2`
+# template are currently hard-coded to act on the UCSF site only.
+multisites:
+  eecs:
+    - ee
+    - cs
+  ucsf:
+    - nursing
+    - silvermandigitallibrary
+  ctsi:
+    - open-proposals
+    - mosaic
+
+################################################################################
+# END Kalamuna proprietary variables ###########################################
+################################################################################
