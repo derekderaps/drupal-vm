@@ -39,6 +39,10 @@ server {
         deny all;
         return 404;
     }
+    # Allow "Well-Known URIs" as per RFC 5785
+    location ~* ^/.well-known/ {
+        allow all;
+    }
     location ~ (^|/)\. {
         return 403;
     }
@@ -75,6 +79,9 @@ server {
     {% block location_image_styles -%}
     location ~ ^/sites/.*/files/styles/ {
         try_files $uri @rewrite;
+    }
+    location ~ ^(/[a-z\-]+)?/system/files/ {
+        try_files $uri /index.php?$query_string;
     }
     {% endblock %}
 

@@ -64,7 +64,6 @@ pages:
     - 'Pre- and Post-Provision Scripts': 'extending/scripts.md'
   - Other Information:
     - 'Networking Notes': 'other/networking.md'
-    - 'Vagrant and VirtualBox': 'other/vagrant-virtualbox.md'
     - 'Vagrant LXC provider': 'other/vagrant-lxc.md'
     - 'Improving Performance': 'other/performance.md'
     - 'Docker': 'other/docker.md'
@@ -72,5 +71,6 @@ pages:
     - 'Drupal multisite': 'deployment/multisite.md'
     - 'Drupal 6 Notes': 'other/drupal-6.md'
     - 'Drupal VM Management Tools': 'other/management-tools.md'
+    - 'Emulating Acquia Cloud environment': 'other/acquia.md'
     - 'Deploying to a production environment': 'other/production.md'
     - 'Wordpress or other applications': 'other/wordpress-other-applications.md'
