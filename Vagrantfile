@@ -29,7 +29,7 @@ end
 # context.
 require 'yaml'
 kalaconfig = YAML.load_file("#{host_drupalvm_dir}/default.config.yml")
-['config.yml', 'local.config.yml', "#{drupalvm_env}.config.yml"].each do |config_file|
+['local.config.yml', "#{drupalvm_env}.config.yml"].each do |config_file|
   if File.exist?("#{host_config_dir}/#{config_file}")
     optional_config = YAML.load_file("#{host_config_dir}/#{config_file}")
     kalaconfig.merge!(optional_config) if optional_config
