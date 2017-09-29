@@ -358,7 +358,6 @@ sites:
   /:
     - dent
     - eecs
-    - eight
     - greenbiz
     - hsa
     - kcom
@@ -368,6 +367,7 @@ sites:
     - trulymad
     - usfi
   /web:
+    - eight
     - k3n
     - kalablog8
     - progmi
